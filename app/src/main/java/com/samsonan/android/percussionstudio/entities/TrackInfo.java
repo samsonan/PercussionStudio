@@ -38,12 +38,12 @@ public class TrackInfo {
         mSounds = new SoundInfo [soundsInBar * mBarCnt];
     }
 
-    public void addBar(int soundsPerBar){
-        SoundInfo [] newArray = new SoundInfo[mSounds.length + soundsPerBar];
+    public void addBars(int barCnt, int soundsPerBar){
+        SoundInfo [] newArray = new SoundInfo[mSounds.length + barCnt*soundsPerBar];
         System.arraycopy(mSounds,0,newArray,0,Math.min(mSounds.length,newArray.length));
         mSounds = newArray;
 
-        mBarCnt++;
+        mBarCnt+=barCnt;
     }
 
     public void updateTrackMeasureType(MeasureTypes measure){

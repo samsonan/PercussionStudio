@@ -109,5 +109,10 @@ public class RhythmEditActivity extends Activity implements RhythmEditFragment.C
         mEditFragment.onTrackAction(button);
     }
 
+    @Override
+    public void onBackPressed() {
+        mEditFragment.onBackPressed();
+    }
+
 
 }

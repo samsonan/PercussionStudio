@@ -1,6 +1,7 @@
 package com.samsonan.android.percussionstudio.components;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -59,6 +60,15 @@ public class RhythmListActivity extends Activity
             Intent detailIntent = new Intent(this, RhythmViewActivity.class);
             detailIntent.putExtra(RhythmEditFragment.ARG_RHYTHM_ID, id);
             startActivity(detailIntent);
+        }
+    }
+
+    @Override
+    public void onRhythmDeleted() {
+        if (mTwoPane) {
+            Fragment currentDetailFragment = getFragmentManager().findFragmentById(R.id.rhythm_detail_container);
+            if (currentDetailFragment != null)
+                getFragmentManager().beginTransaction().remove(currentDetailFragment).commit();
         }
     }
 }

@@ -24,7 +24,7 @@
     <string name="rhythm_info_title">Rhythm Properties</string>
     <string name="track_play_together_info">[play together with prev. track]</string>
     <string name="btn_add_track">ADD NEW TRACK</string>
-    <string name="no_category">Rhythms without category</string><!--rhythm list-->
+    <string name="no_category">Empty category</string><!--rhythm list-->
     <string name="category_request">Category:</string>
     <string name="description_request">Description:</string>
     <string name="measure_request">Rhythm measure:</string>

@@ -84,13 +84,14 @@ public class RhythmEditFragment extends Fragment
     private boolean mIsSimpleMode = true; //true - image for instruments, otherwise - buttons
 
     private boolean mIsEditMode;
+    private boolean mIsChangesMade;
 
     private InstrumentFactory mFactory;
 
     private RhythmInfo mRhythmInfo;
     private InstrumentFactory.Instruments mCurrentInstrument;
 
-    private int mBpm = 120;      //default bpm number = 60
+    private int mBpm = 120;      //default bpm number
 
     private Timer mPlayerTimer;
     private int mCounter = 0;
@@ -132,7 +133,7 @@ public class RhythmEditFragment extends Fragment
     /**
      * Whether we should add new measure bar when we reach track end or not
      */
-    public boolean isAddBarOnTrackEnd(){
+    public boolean isAddBarOnTrackEnd() {
         return mIsAddNewBarOnTrackEnd;
     }
 
@@ -173,6 +174,7 @@ public class RhythmEditFragment extends Fragment
                 mRhythmInfo.addTrack(newTrack);
 
                 mMusicPanel.setRhythmInfo(mRhythmInfo, true);
+                mIsChangesMade = true;
             }
         });
 
@@ -191,9 +193,12 @@ public class RhythmEditFragment extends Fragment
      */
     @Override
     public void onAddBarToTrack(int trackIdx) {
+        mIsChangesMade = true;
         Log.d(TAG, "onAddBarToTrack.  trackIdx:" + trackIdx);
-        mRhythmInfo.getTracks().get(trackIdx).addBar(mRhythmInfo.getSoundNumberForBar());
+        mRhythmInfo.getTracks().get(trackIdx).addBars(1, mRhythmInfo.getSoundNumberForBar());
         mMusicPanel.setRhythmInfo(mRhythmInfo, true);
+        mIsChangesMade = true;
+
     }
 
     /**
@@ -305,6 +310,7 @@ public class RhythmEditFragment extends Fragment
 
                     mRhythmInfo.removeTrack(trackIdx);
                     mMusicPanel.setRhythmInfo(mRhythmInfo, true);
+                    mIsChangesMade = true;
 
                     mMusicPanel.setSelectedPosition(0, 0);
                     onPositionSelected(0, 0);//imitate position click in order to show instrument panel
@@ -316,6 +322,8 @@ public class RhythmEditFragment extends Fragment
 
                     mRhythmInfo.swapTracks(trackIdx + 1, trackIdx);
                     mMusicPanel.setRhythmInfo(mRhythmInfo, false);
+                    mIsChangesMade = true;
+
                     mMusicPanel.setSelectedTrack(trackIdx + 1);
                     onTrackHeaderSelected(trackIdx + 1);
                 }
@@ -326,6 +334,8 @@ public class RhythmEditFragment extends Fragment
 
                     mRhythmInfo.swapTracks(trackIdx - 1, trackIdx);
                     mMusicPanel.setRhythmInfo(mRhythmInfo, false);
+                    mIsChangesMade = true;
+
                     mMusicPanel.setSelectedTrack(trackIdx - 1);
                     onTrackHeaderSelected(trackIdx - 1);
                 }
@@ -340,6 +350,7 @@ public class RhythmEditFragment extends Fragment
                 }
 
                 mMusicPanel.setRhythmInfo(mRhythmInfo, false);
+                mIsChangesMade = true;
 
                 break;
         }
@@ -359,7 +370,7 @@ public class RhythmEditFragment extends Fragment
 
         switch (button.getId()) {
             case R.id.add_bar:
-                mRhythmInfo.getTracks().get(trackIdx).addBar(mRhythmInfo.getSoundNumberForBar());
+                mRhythmInfo.getTracks().get(trackIdx).addBars(1, mRhythmInfo.getSoundNumberForBar());
                 break;
             case R.id.clone_bar:
                 mRhythmInfo.getTracks().get(trackIdx).cloneBar(barIdx, mRhythmInfo.getSoundNumberForBar());
@@ -379,6 +390,8 @@ public class RhythmEditFragment extends Fragment
         mRhythmInfo.removeConnectedFlagCascade(trackIdx + 1);
 
         mMusicPanel.setRhythmInfo(mRhythmInfo, true);
+        mIsChangesMade = true;
+
     }
 
     /**
@@ -386,17 +399,19 @@ public class RhythmEditFragment extends Fragment
      */
     public void onSoundSelected(View button) {
 
-        if (button.getId() == R.id.sound_del){ //backspace button
+        if (button.getId() == R.id.sound_del) { //backspace button
             int positionX = mMusicPanel.getSelectedPosition();
             if (positionX == 0)
                 return;
 
             int trackIdx = mMusicPanel.getSelectedTrack();
             TrackInfo track = mRhythmInfo.getTracks().get(trackIdx);
-            track.getSounds()[positionX-1] = null;
+            track.getSounds()[positionX - 1] = null;
 
-            mMusicPanel.setSelectedPosition(positionX-1, trackIdx);
+            mMusicPanel.setSelectedPosition(positionX - 1, trackIdx);
             mMusicPanel.setRhythmInfo(mRhythmInfo, false);
+            mIsChangesMade = true;
+
             return;
         }
 
@@ -405,19 +420,16 @@ public class RhythmEditFragment extends Fragment
     }
 
     public void onSoundSelected(InstrumentSound newSound) {
-        boolean layoutChanged = false;
         TrackInfo track = mRhythmInfo.getTracks().get(mMusicPanel.getSelectedTrack());
         if (newSound == null)
             track.getSounds()[mMusicPanel.getSelectedPosition()] = null;
         else {
-//            if (track.getSounds().length <= mMusicPanel.getSelectedPosition()) {
-//                track.addBar(mRhythmInfo.getSoundNumberForBar());
-//                layoutChanged = true;
-//            }
             track.getSounds()[mMusicPanel.getSelectedPosition()] = new SoundInfo(newSound);
         }
 
-        mMusicPanel.setRhythmInfo(mRhythmInfo, layoutChanged);
+        mMusicPanel.setRhythmInfo(mRhythmInfo, false);
+        mIsChangesMade = true;
+
         mMusicPanel.incrementSelectedPosition();
     }
 
@@ -443,6 +455,7 @@ public class RhythmEditFragment extends Fragment
         mRhythmInfo.setDescription(newDescription);
 
         mMusicPanel.setRhythmInfo(mRhythmInfo, false);
+        mIsChangesMade = true;
     }
 
     /**
@@ -560,6 +573,8 @@ public class RhythmEditFragment extends Fragment
         if (getArguments().containsKey(ARG_RHYTHM_ID)) {
 
             mRhythmInfo = databaseHelper.getRhythmInfoById(getArguments().getLong(ARG_RHYTHM_ID));
+            if (mRhythmInfo.getBpm() > 0)
+                mBpm = mRhythmInfo.getBpm();
         }
         if (getArguments().containsKey(RhythmListFragment.INSTRUMENT_ID)) {
             mCurrentInstrument = InstrumentFactory.Instruments.values()[getArguments().getInt(RhythmListFragment.INSTRUMENT_ID)];
@@ -634,7 +649,94 @@ public class RhythmEditFragment extends Fragment
             }
         });
 
+        onRestoreInstanceState(savedInstanceState);
+
         return mRootView;
+    }
+
+
+    private long mTmpRhythmId = -1;
+    private static final String INSTANCE_STATE_TMP_ID = "INSTANCE_STATE_TMP_ID";
+    private static final String INSTANCE_STATE_ID = "INSTANCE_STATE_ID";
+    private static final String INSTANCE_STATE_BPM = "INSTANCE_STATE_BPM";
+    private static final String INSTANCE_STATE_UNSAVED_CHANGES = "INSTANCE_STATE_UNSAVED_CHANGES";
+
+    @Override
+    public void onSaveInstanceState (Bundle outState) {
+        Log.d(TAG, "onSaveInstanceState() start");
+
+        if (outState != null) {
+            if (mIsEditMode) {
+                PercussionDatabase databaseHelper = new PercussionDatabase(getActivity());
+                outState.putLong(INSTANCE_STATE_ID, mRhythmInfo.getId());
+                outState.putBoolean(INSTANCE_STATE_UNSAVED_CHANGES, mIsChangesMade);
+                mTmpRhythmId = databaseHelper.saveRhythmsState(mRhythmInfo, mTmpRhythmId);
+                outState.putLong(INSTANCE_STATE_TMP_ID, mTmpRhythmId);
+            } else
+                outState.putInt(INSTANCE_STATE_BPM, mBpm);
+
+        }
+
+        Log.d(TAG, "onSaveInstanceState() end");
+    }
+
+    public void onRestoreInstanceState(Bundle savedState) {
+        Log.d(TAG, "onRestoreInstanceState() start. savedState:" + savedState);
+
+        if (savedState != null) {
+            if (mIsEditMode) {
+                mIsChangesMade = savedState.getBoolean(INSTANCE_STATE_UNSAVED_CHANGES);
+                PercussionDatabase databaseHelper = new PercussionDatabase(getActivity());
+                mRhythmInfo = databaseHelper.getRhythmInfoById(savedState.getLong(INSTANCE_STATE_TMP_ID));
+                mRhythmInfo.setId(savedState.getLong(INSTANCE_STATE_ID));
+                mMusicPanel.setRhythmInfo(mRhythmInfo, true);
+                mActivityContainerCallbacks.setActivityTitle(mRhythmInfo.getTitle());
+            } else
+                mBpm = savedState.getInt(INSTANCE_STATE_BPM);
+        }
+
+        Log.d(TAG, "onRestoreInstanceState() end");
+    }
+
+    public void onBackPressed() {
+
+        Log.d(TAG, "onBackPressed()");
+
+        if (!mIsEditMode || !mIsChangesMade) {
+            returnToParentActivity();
+        } else {
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setTitle("Discard?")
+                    .setMessage("Your changes are not saved. Are you sure you want to discard changes?")
+                    .setPositiveButton(R.string.btn_confirm, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            //exit activity
+                            returnToParentActivity();
+                        }
+                    })
+                    .setNegativeButton(R.string.btn_cancel,
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    // Canceled.
+                                }
+                            });
+
+            builder.show();
+        }
+    }
+
+    /**
+     * Depending on the device and layout (1-pane o 2-pane, we may have different stack of activities).
+     * There may be or may be not RhythmListActivity in the back stack, nut since it is in a singleTask mode,
+     * we don't care
+     */
+    private void returnToParentActivity(){
+
+        Intent newIntent = new Intent(getActivity(), RhythmListActivity.class);
+        startActivity(newIntent);
+
+        getActivity().finish();
     }
 
     /**
@@ -703,6 +805,7 @@ public class RhythmEditFragment extends Fragment
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 mBpm = bpmEditBar.getProgress() + MIN_BPM;
+                                mRhythmInfo.setBpm(mBpm);
                                 mPlaySettingsText.setText(mBpm + "");
                             }
                         }
@@ -835,11 +938,12 @@ public class RhythmEditFragment extends Fragment
 
     private void updateRhythmInDatabase() {
         PercussionDatabase helper = new PercussionDatabase(getActivity());
-        long newID = helper.saveRhythm(mRhythmInfo);
+        long newID = helper.saveRhythm(mRhythmInfo,false);
 
         Log.d(TAG, "Rhythm ID [" + mRhythmInfo.getId() + "] is saved. New ID [" + newID + "]");
 
         mRhythmInfo.setId(newID);
+        mIsChangesMade = false;
     }
 
 
@@ -960,6 +1064,9 @@ public class RhythmEditFragment extends Fragment
                 return true;
             case R.id.action_info:
                 onShowInfo();
+                return true;
+            case android.R.id.home:
+                onBackPressed();
                 return true;
             case R.id.action_settings:
 

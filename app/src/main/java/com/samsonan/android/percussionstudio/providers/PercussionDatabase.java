@@ -31,11 +31,13 @@ public class PercussionDatabase {
 
         public static final String TABLE_NAME = "rhythms";
         public static final String COLUMN_NAME_TITLE = "title";
+        public static final String COLUMN_NAME_BPM = "bpm";
         public static final String COLUMN_NAME_DESCRIPTION = "description";
         public static final String COLUMN_NAME_BIT_LENGTH = "bit_length" ; // 1/x, x - bit length
         public static final String COLUMN_NAME_BAR_BITS = "bar_bits" ;
         public static final String COLUMN_NAME_CATEGORY = "category";
         public static final String COLUMN_NAME_INTERNAL_FLAG= "internal";
+        public static final String COLUMN_NAME_HIDDEN_FLAG= "hidden";
 	}
 
 	public static final class TrackTable implements BaseColumns {
@@ -66,7 +68,7 @@ public class PercussionDatabase {
     static class MetaphorsDBHelper extends SQLiteOpenHelper {
 
         private static final String DATABASE_NAME = "percussion.db";
-        private static final int SCHEMA_VERSION = 2;
+        private static final int SCHEMA_VERSION = 1;
 
         MetaphorsDBHelper(Context context) {
             super(context, DATABASE_NAME, null, SCHEMA_VERSION);
@@ -89,8 +91,10 @@ public class PercussionDatabase {
                     RhythmTable.COLUMN_NAME_DESCRIPTION + " TEXT, " +
                     RhythmTable.COLUMN_NAME_CATEGORY + " TEXT, " + // INTEGER DEFAULT 1
                     RhythmTable.COLUMN_NAME_INTERNAL_FLAG + " INTEGER DEFAULT 0, " +
+                    RhythmTable.COLUMN_NAME_HIDDEN_FLAG + " INTEGER DEFAULT 0, " +
                     RhythmTable.COLUMN_NAME_BIT_LENGTH + " INTEGER DEFAULT 4, " +
-            		RhythmTable.COLUMN_NAME_BAR_BITS + " INTEGER DEFAULT 4);");
+                    RhythmTable.COLUMN_NAME_BAR_BITS + " INTEGER DEFAULT 4, "+
+            		RhythmTable.COLUMN_NAME_BPM + " INTEGER);");
 
             db.execSQL("CREATE TABLE " + TrackTable.TABLE_NAME + " ( " + 
             		TrackTable._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," + 
@@ -146,7 +150,7 @@ public class PercussionDatabase {
     	String query = "SELECT "+RhythmTable.COLUMN_NAME_TITLE+
                 ", "+RhythmTable._ID +
                 ", "+RhythmTable.COLUMN_NAME_CATEGORY +
-                " FROM "+RhythmTable.TABLE_NAME;
+                " FROM "+RhythmTable.TABLE_NAME +" WHERE "+RhythmTable.COLUMN_NAME_HIDDEN_FLAG+" =0";
     	return mOpenHelper.getReadableDatabase().rawQuery(query, null);
     }
 
@@ -170,6 +174,7 @@ public class PercussionDatabase {
     			", "+RhythmTable._ID+" " +
                 ", "+RhythmTable.COLUMN_NAME_DESCRIPTION+" " +
                 ", "+RhythmTable.COLUMN_NAME_INTERNAL_FLAG+" " +
+                ", "+RhythmTable.COLUMN_NAME_BPM+" " +
     			" FROM "+RhythmTable.TABLE_NAME+" g " +
     			" WHERE g._ID = ? ", 
     			new String[]{rhythmId+""});
@@ -180,7 +185,8 @@ public class PercussionDatabase {
     		Log.d(TAG, "Rhythm with ID "+rhythmId+" is found. Processing...");
 
     		rhythmInfo = new RhythmInfo(rhythmCursor.getLong(4), rhythmCursor.getString(0), rhythmCursor.getShort(1), rhythmCursor.getShort(2), rhythmCursor.getString(5), rhythmCursor.getString(3), rhythmCursor.getInt(6));
-    		
+            rhythmInfo.setBpm(rhythmCursor.getInt(7));//its not really a rhythm attribute, so it is not in constructor
+
     		Cursor trackCursor = db.rawQuery("SELECT "+TrackTable.COLUMN_NAME_TITLE+
         			", "+TrackTable.COLUMN_NAME_INSTRUMENT+
                     ", "+TrackTable.COLUMN_NAME_BAR_CNT+
@@ -225,7 +231,7 @@ public class PercussionDatabase {
     
     public long cloneRhythm(RhythmInfo rhythmInfo){
     	rhythmInfo.setId(-1);
-    	return saveRhythm(rhythmInfo);
+    	return saveRhythm(rhythmInfo, false);
     }
 
     public long cloneRhythmById(long rhythmId){
@@ -233,7 +239,7 @@ public class PercussionDatabase {
         rhythmInfo.setTitle( rhythmInfo.getTitle() + " (Copy)" );
         rhythmInfo.setInternalFlag(0);
         rhythmInfo.setId(-1);
-        return saveRhythm(rhythmInfo);
+        return saveRhythm(rhythmInfo, false);
     }
 
 
@@ -250,8 +256,13 @@ public class PercussionDatabase {
         db.delete(TrackTable.TABLE_NAME, TrackTable.COLUMN_NAME_RHYTHM_ID + " = ?" , new String[]{rhythmId + ""} );
         db.delete(RhythmTable.TABLE_NAME, RhythmTable._ID + " = ?" , new String[]{rhythmId + ""} );
     }
-    
-    public long saveRhythm(RhythmInfo rhythmInfo){
+
+    public long saveRhythmsState(RhythmInfo rhythmInfo, long tmpRhythmId) {
+        rhythmInfo.setId(tmpRhythmId); //if -1, then do insert
+        return saveRhythm(rhythmInfo, true);
+    }
+
+    public long saveRhythm(RhythmInfo rhythmInfo, boolean isHidden){
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
     	
         Log.d(TAG, "Going to save rhythm: "+rhythmInfo);
@@ -263,6 +274,8 @@ public class PercussionDatabase {
         cv.put(RhythmTable.COLUMN_NAME_DESCRIPTION, rhythmInfo.getDescription());
         cv.put(RhythmTable.COLUMN_NAME_BAR_BITS, rhythmInfo.getBitsPerBar());
         cv.put(RhythmTable.COLUMN_NAME_CATEGORY, rhythmInfo.getCategory());
+        cv.put(RhythmTable.COLUMN_NAME_HIDDEN_FLAG, isHidden?1:0);
+        cv.put(RhythmTable.COLUMN_NAME_BPM, rhythmInfo.getBpm());
         cv.put(RhythmTable.COLUMN_NAME_BIT_LENGTH, rhythmInfo.getBitLength());
 
         if (rhythmId != -1) {

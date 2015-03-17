@@ -35,10 +35,13 @@ public class RhythmListFragment extends ListFragment {
 
     private Callbacks mCallbacks;
 
-    RhythmListAdapter mRhythmListAdapter;
+    private RhythmListAdapter mRhythmListAdapter;
+
+    private PercussionDatabase mHelper;
 
     public interface Callbacks {
         public void onRhythmSelected(long id);
+        public void onRhythmDeleted();
     }
 
     /**
@@ -90,7 +93,9 @@ public class RhythmListFragment extends ListFragment {
         }
     }
 
+    @Override
     public void onResume() {
+        Log.d(TAG, "onResume. updating list");
         updateAdapter();    //we should do this in case we returned using back button
         super.onResume();
     }
@@ -106,10 +111,7 @@ public class RhythmListFragment extends ListFragment {
 
         mCallbacks = (Callbacks) activity;
         mHelper = new PercussionDatabase(getActivity());
-
     }
-
-    PercussionDatabase mHelper;
 
     @Override
     public void onDetach() {
@@ -186,6 +188,7 @@ public class RhythmListFragment extends ListFragment {
             case R.id.action_remove:
 
                 mHelper.removeRhythmById(info.id);
+                mCallbacks.onRhythmDeleted();
                 updateAdapter();
                 return true;
             case R.id.action_clone:

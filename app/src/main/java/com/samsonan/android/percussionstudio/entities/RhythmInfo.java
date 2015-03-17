@@ -14,7 +14,8 @@ public class RhythmInfo {
     private String mCategory;
     private String mDescription;
     private long mId = -1;
-    private int mInternal = 0;//internal rhythms cannot be edited or deleted
+    private int mInternal = 0;  //internal rhythms cannot be edited or deleted
+    private int mBpm = -1;      //rhythm default playing speed
 
     //by default it is 4/4 measure
     private MeasureTypes mMeasure = MeasureTypes.MEASURE_4_4;
@@ -97,7 +98,7 @@ public class RhythmInfo {
         //now we need to extend all connected tracks to that length
         for (int i=trackIdx;i>=0;i--){
             if (mTracks.get(i).getBarCnt() < maxBarCnt)
-                mTracks.get(i).addBar(getSoundNumberForBar()*(maxBarCnt - mTracks.get(i).getBarCnt()));
+                mTracks.get(i).addBars(maxBarCnt - mTracks.get(i).getBarCnt(), getSoundNumberForBar());
             if (i!=trackIdx && !mTracks.get(i).isConnectedPrev())
                 break;
         }
@@ -149,6 +150,14 @@ public class RhythmInfo {
 
     public void setId(long id) {
         mId = id;
+    }
+
+    public int getBpm() {
+        return mBpm;
+    }
+
+    public void setBpm(int bpm) {
+        this.mBpm = bpm;
     }
 
     public void setMeasure(MeasureTypes measure) {
