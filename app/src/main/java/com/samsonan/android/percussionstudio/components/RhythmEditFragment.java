@@ -498,6 +498,10 @@ public class RhythmEditFragment extends Fragment
      */
     @Override
     public boolean onTouch(View v, MotionEvent ev) {
+
+        if (!mIsSimpleMode)
+            return true;
+
         final int action = ev.getAction();
         final int evX = (int) ev.getX();
         final int evY = (int) ev.getY();
@@ -525,11 +529,15 @@ public class RhythmEditFragment extends Fragment
      * Get color from our hotspot image
      */
     private int getHotspotColor(int hotspotId, int x, int y) {
-        ImageView img = (ImageView) mRootView.findViewById(hotspotId);
-        img.setDrawingCacheEnabled(true);
-        Bitmap hotspots = Bitmap.createBitmap(img.getDrawingCache());
-        img.setDrawingCacheEnabled(false);
-        return hotspots.getPixel(x, y);
+        try {
+            ImageView img = (ImageView) mRootView.findViewById(hotspotId);
+            img.setDrawingCacheEnabled(true);
+            Bitmap hotspots = Bitmap.createBitmap(img.getDrawingCache());
+            img.setDrawingCacheEnabled(false);
+            return hotspots.getPixel(x, y);
+        }catch (Exception e){
+            return 0;
+        }
     }
 
     /**
@@ -933,7 +941,8 @@ public class RhythmEditFragment extends Fragment
     private void onDeleteRhythm() {
         PercussionDatabase helper = new PercussionDatabase(getActivity());
         helper.removeRhythmById(mRhythmInfo.getId());
-        getActivity().finish();
+
+        returnToParentActivity();
     }
 
     private void updateRhythmInDatabase() {
