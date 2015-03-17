@@ -4,6 +4,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Track entity class
@@ -46,6 +47,48 @@ public class TrackInfo {
         mBarCnt+=barCnt;
     }
 
+    /**
+     * Add bars at selected position
+     */
+    public void addBars(int barPositionIdx, int barCnt, int soundsPerBar){
+        SoundInfo [] newArray = new SoundInfo[mSounds.length + barCnt*soundsPerBar];
+        int sndPositionIdx = barPositionIdx * soundsPerBar;
+        for (int i = 0; i < newArray.length; i++) {
+            if (i < sndPositionIdx)
+                newArray[i] = mSounds[i];
+            else if (i >= sndPositionIdx + (barCnt * soundsPerBar)) {
+                newArray[i] = mSounds[i - barCnt * soundsPerBar];
+            }
+        }
+
+        mSounds = newArray;
+        mBarCnt+=barCnt;
+    }
+
+    public void cloneBar(int barNum, int soundsPerBar){
+
+        Log.d(TAG, "Cloning Bar num:"+barNum+", soundsPerBar:"+soundsPerBar+". Source array:"+Arrays.toString(mSounds));
+
+        //empty new array with additional space for new bar
+        SoundInfo [] newArray = new SoundInfo[mSounds.length + soundsPerBar];
+
+        //copy old array to a new one
+        System.arraycopy(mSounds,0,newArray,0,mSounds.length);
+        ArrayList<SoundInfo> temp = new ArrayList<>(Arrays.asList(newArray));
+
+        //adding sounds to designated positions
+        for (int i=barNum*soundsPerBar;i<(barNum+1)*soundsPerBar;i++)
+            temp.add(barNum*soundsPerBar+i, mSounds[i]);
+
+        //converting list back to array
+        mSounds = temp.toArray(newArray);
+
+        Log.d(TAG, "Cloning complete. Result:"+Arrays.toString(mSounds));
+
+        mBarCnt++;
+    }
+
+
     public void updateTrackMeasureType(MeasureTypes measure){
         //OK, lets try not to loose any information, so if the track becomes shorter, then we add additional bar
         int totalSounds = getBarCnt() * measure.getSoundNumberForBar();
@@ -67,28 +110,6 @@ public class TrackInfo {
 
     public void discardSoundInformation(){
         mSounds = new SoundInfo [mSounds.length];
-    }
-
-    public void cloneBar(int barNum, int soundsPerBar){
-
-        Log.d(TAG, "Cloning Bar num:"+barNum+", soundsPerBar:"+soundsPerBar+". Source array:"+Arrays.toString(mSounds));
-
-        //empty new array with additional space for new bar
-        SoundInfo [] newArray = new SoundInfo[mSounds.length + soundsPerBar];
-        //copy old array to a new one
-        System.arraycopy(mSounds,0,newArray,0,mSounds.length);
-        ArrayList<SoundInfo> temp = new ArrayList<>(Arrays.asList(newArray));
-
-        //adding sounds to designated positions
-        for (int i=barNum*soundsPerBar;i<(barNum+1)*soundsPerBar;i++)
-            temp.add((barNum+1)*soundsPerBar+i, mSounds[i]);
-
-        //converting list back to array
-        mSounds = temp.toArray(newArray);
-
-        Log.d(TAG, "Cloning complete. Result:"+Arrays.toString(mSounds));
-
-        mBarCnt++;
     }
 
     public void removeBar(int barNum, int soundsPerBar){

@@ -268,17 +268,18 @@ public class RhythmEditFragment extends Fragment
 
         Log.d(TAG, "onTrackHeaderSelected.  trackIdx:" + trackIdx);
 
-        /**
-         * Connect track to the previous track - only if there is a prev. track!
-         */
-        CheckBox connectedChb = (CheckBox) mRootView.findViewById(R.id.is_connected_chb);
-        connectedChb.setChecked(mRhythmInfo.getTracks().get(trackIdx).isConnectedPrev());
-        connectedChb.setEnabled(trackIdx > 0);
-
         if (trackIdx > -1) {
             mSoundEditorPanel.setVisibility(View.GONE);
             mTrackEditPanel.setVisibility(View.VISIBLE);
             mBarEditPanel.setVisibility(View.GONE);
+
+            /**
+             * Connect track to the previous track - only if there is a prev. track!
+             */
+            CheckBox connectedChb = (CheckBox) mRootView.findViewById(R.id.is_connected_chb);
+            connectedChb.setChecked(mRhythmInfo.getTracks().get(trackIdx).isConnectedPrev());
+            connectedChb.setEnabled(trackIdx > 0);
+
         } else {
             mSoundEditorPanel.setVisibility(View.GONE);
             mTrackEditPanel.setVisibility(View.VISIBLE);
@@ -370,7 +371,7 @@ public class RhythmEditFragment extends Fragment
 
         switch (button.getId()) {
             case R.id.add_bar:
-                mRhythmInfo.getTracks().get(trackIdx).addBars(1, mRhythmInfo.getSoundNumberForBar());
+                mRhythmInfo.getTracks().get(trackIdx).addBars((barIdx+1), 1, mRhythmInfo.getSoundNumberForBar());
                 break;
             case R.id.clone_bar:
                 mRhythmInfo.getTracks().get(trackIdx).cloneBar(barIdx, mRhythmInfo.getSoundNumberForBar());
