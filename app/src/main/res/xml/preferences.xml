@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory android:title="@string/pref_ui">
+        <CheckBoxPreference android:id="@+id/pref_ui_mode"
+            android:key="pref_ui_mode"
+            android:defaultValue="false"
+            android:summary="@string/pref_ui_mode"
+            android:text="@string/pref_ui_mode"
+            />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/pref_editor">
+        <CheckBoxPreference android:id="@+id/pref_auto_add_bar"
+            android:key="pref_auto_add_bar"
+            android:defaultValue="false"
+            android:text="@string/pref_auto_add_bar"
+            android:summary="@string/pref_auto_add_bar"
+            />
+    </PreferenceCategory>
+
+</PreferenceScreen>    
+

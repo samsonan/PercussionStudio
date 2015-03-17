@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="dark_gray">#ff595959</color>
+    <color name="section_text_color">#CC2F3031</color>
+    <color name="golden_brown_dark">#de897434</color>
+    <color name="button_gray">#ffd0d0d0</color>
+    <color name="track_bar_bg">#64d3d3d3</color>
+    <color name="track_bar_sel_bg">#fffdf8b5</color>
+    <color name="track_title_bg">#64d3d3d3</color>
+    <color name="track_title_sel_bg">#fffdf8b5</color>
+    <color name="add_track_bg">#64ffffff</color>
+</resources>

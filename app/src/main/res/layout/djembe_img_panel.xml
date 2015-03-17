@@ -1,0 +1,30 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/djembe_sound_panel_img"
+    android:layout_alignParentBottom="true"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:layout_centerHorizontal="true">
+
+    <ImageView
+        android:src="@drawable/djembe_areas_img"
+        android:id="@+id/djembe_hotspot_img"
+        android:visibility="invisible"
+        android:layout_width="wrap_content"
+        android:layout_height="170dp" />
+
+    <ImageView
+        android:src="@drawable/djembe_img"
+        android:id="@+id/djembe_img"
+        android:layout_width="wrap_content"
+        android:layout_height="170dp" />
+
+    <ImageView
+        android:layout_marginBottom="3dp"
+        android:layout_gravity="bottom|center"
+        android:onClick="onInstrumentSelect"
+        android:id="@+id/instrument_select_btn"
+        android:src="@drawable/hover_instrument_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+</FrameLayout>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <style name="panel_button" parent="android:Widget.Holo.Light.TextView">
+        <!--item name="android:background">@color/button_gray</item-->
+        <item name="android:background">@drawable/shadow_block_gray</item>
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:padding">2dp</item>
+        <item name="android:layout_margin">1dp</item>
+        <item name="android:layout_height">35dp</item>
+    </style>
+</resources>

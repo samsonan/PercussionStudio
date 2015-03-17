@@ -1,0 +1,12 @@
+<resources>
+
+    <style name="AppTheme" parent="android:Theme.Holo.Light">
+        <item name="android:windowBackground">@drawable/playback_background</item>
+        <item name="android:actionBarStyle">@style/WhiteActionBar</item>
+    </style>
+
+    <style name="WhiteActionBar" parent="@android:style/Widget.Holo.Light.ActionBar">
+        <item name="android:background">#FFFFFF</item>
+    </style>
+
+</resources>

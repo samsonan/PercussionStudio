@@ -1,0 +1,189 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".EditorActivity">
+
+    <LinearLayout
+        android:layout_alignParentLeft="true"
+        android:id="@+id/control_button_panel"
+        android:layout_alignParentTop="true"
+        android:background="@drawable/button_panel_block"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+
+        <ImageButton
+            android:id="@+id/play_stop_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_play_36dp"
+            android:background="@android:color/transparent"
+            android:layout_margin="5dp" />
+
+        <ImageButton
+            android:id="@+id/play_settings_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_settings_24dp"
+            android:background="@android:color/transparent"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="12dp"/>
+
+
+        <TextView
+            android:id="@+id/rhythm_settings_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="10dp"
+            android:textSize="16sp"
+            android:textColor="@color/dark_gray" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="2dp"
+            android:textSize="16sp"
+            android:text="bpm"
+            android:textColor="@color/dark_gray" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_below="@id/control_button_panel"
+        android:id="@+id/playback_canvas"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_margin="0dp"
+        android:layout_weight="30"
+        android:padding="0dp">
+
+        <com.samsonan.android.percussionstudio.views.TrackView
+            android:id="@+id/music_panel"
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:layout_margin="0dp"
+            android:padding="0dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:visibility="gone"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_width="400dp"
+        android:id="@+id/bar_edit_panel"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button_panel_block"
+        android:padding="5dp"
+        android:layout_margin="0dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:drawableLeft="@drawable/ic_delete_24dp"
+            style="@style/panel_button"
+            android:padding="5dp"
+            android:width="110dp"
+            android:text="@string/delete_bar_btn"
+            android:id="@+id/delete_bar"
+            android:onClick="onBarAction"
+            android:layout_width="wrap_content" />
+
+        <Button
+            android:drawableLeft="@drawable/ic_copy_24dp"
+            style="@style/panel_button"
+            android:padding="5dp"
+            android:width="110dp"
+            android:text="@string/clone_bar_btn"
+            android:id="@+id/clone_bar"
+            android:onClick="onBarAction"
+            android:layout_width="wrap_content" />
+
+        <Button
+            android:drawableLeft="@drawable/ic_plus_24dp"
+            style="@style/panel_button"
+            android:padding="5dp"
+            android:width="110dp"
+            android:text="@string/add_bar_btn"
+            android:id="@+id/add_bar"
+            android:onClick="onBarAction"
+            android:layout_width="wrap_content" />
+    </LinearLayout>
+
+    <RelativeLayout
+        android:visibility="gone"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_width="400dp"
+        android:id="@+id/track_edit_panel"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button_panel_block"
+        android:padding="5dp"
+        android:layout_margin="0dp">
+
+        <EditText
+            android:id="@+id/track_title_edit"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/track_title_hint"
+            android:singleLine="true" />
+
+        <Button
+            android:layout_below="@id/track_title_edit"
+            android:drawableLeft="@drawable/ic_arrow_up_24dp"
+            style="@style/panel_button"
+            android:padding="5dp"
+            android:width="110dp"
+            android:hint="@string/track_move_up_btn"
+            android:id="@+id/action_track_move_up"
+            android:onClick="onTrackAction"
+            android:layout_width="wrap_content" />
+
+        <Button
+            android:layout_below="@id/action_track_move_up"
+            android:drawableLeft="@drawable/ic_arrow_down_24dp"
+            style="@style/panel_button"
+            android:padding="5dp"
+            android:width="110dp"
+            android:hint="@string/track_move_down_btn"
+            android:id="@+id/action_track_move_down"
+            android:onClick="onTrackAction"
+            android:layout_width="wrap_content" />
+
+        <CheckBox
+            android:id="@+id/is_connected_chb"
+            android:onClick="onTrackAction"
+            android:layout_below="@id/track_title_edit"
+            android:layout_toRightOf="@id/action_track_move_up"
+            android:text="@string/track_play_together_chb"
+            android:checked="false"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:drawableLeft="@drawable/ic_delete_24dp"
+            style="@style/panel_button"
+            android:padding="5dp"
+            android:width="110dp"
+            android:hint="@string/track_delete_btn"
+            android:id="@+id/action_track_delete"
+            android:onClick="onTrackAction"
+            android:layout_width="wrap_content"
+            android:layout_alignBottom="@+id/action_track_move_down"
+            android:layout_alignLeft="@+id/is_connected_chb" />
+    </RelativeLayout>
+
+    <FrameLayout
+        android:layout_weight="1"
+
+        android:id="@+id/sounds_panel"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_width="400dp"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"></FrameLayout>
+
+</RelativeLayout>

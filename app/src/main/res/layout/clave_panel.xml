@@ -1,0 +1,58 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/clave_sounds_panel"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/button_panel_block"
+    android:padding="10dp">
+
+    <TableLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <TableRow android:layout_height="20dp">
+
+            <Button
+                android:id="@+id/sound_hit"
+                android:width="80dp"
+                style="@style/panel_button"
+                android:onClick="onSoundSelected"
+                android:text="@string/snd_clave_X" />
+
+            <Button
+                android:layout_marginLeft="20dp"
+                android:drawableLeft="@drawable/ic_arrow_left_24dp"
+                android:id="@+id/sound_del"
+                android:width="60dp"
+                style="@style/panel_button"
+                android:onClick="onSoundSelected"
+                android:text="Del" />
+
+        </TableRow>
+
+        <TableRow android:layout_height="30dp">
+
+            <Button
+                android:id="@+id/sound_blank"
+                android:width="80dp"
+                style="@style/panel_button"
+                android:onClick="onSoundSelected"
+                android:text="@string/snd_blank" />
+
+        </TableRow>
+
+    </TableLayout>
+
+    <ImageView
+        android:layout_margin="5dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:onClick="onInstrumentSelect"
+        android:id="@+id/instrument_select_btn"
+        android:src="@drawable/hover_instrument_btn"
+        android:layout_gravity="bottom|right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        />
+
+</FrameLayout>

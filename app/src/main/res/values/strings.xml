@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Percussion Studio</string>
+    <string name="instrument_request">Select Instrument</string>
+    <string name="btn_confirm">Confirm</string>
+    <string name="btn_clone">Clone</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="action_add_rhythm">Add New Rhythm</string>
+    <string name="action_save_rhythm">Save Rhythm</string>
+    <string name="action_clone_rhythm">Clone Rhythm</string>
+    <string name="action_edit_rhythm">Edit Rhythm</string>
+    <string name="action_delete_rhythm">Delete Rhythm</string>
+    <string name="action_settings">Settings</string>
+    <string name="rhythm_title_request">Rhythm Title:</string>
+    <string name="rhythm_title_hint">Rhythm Title</string>
+    <string name="rhythm_description_hint">Rhythm Description</string>
+    <string name="new_rhythm_title_request">New Rhythm Title</string>
+    <string name="title_new_rhythm">New Rhythm</string>
+    <string name="title_rhythm_view">Rhythm View</string>
+    <string name="title_rhythm_edit">Rhythm Edit</string>
+    <string name="title_play_settings">Set Rhythm Speed</string>
+    <string name="title_rhythm_settings">Set Measure</string>
+    <string name="rhythm_info_title">Rhythm Properties</string>
+    <string name="track_play_together_info">[play together with prev. track]</string>
+    <string name="btn_add_track">ADD NEW TRACK</string>
+    <string name="no_category">Rhythms without category</string><!--rhythm list-->
+    <string name="category_request">Category:</string>
+    <string name="description_request">Description:</string>
+    <string name="measure_request">Rhythm measure:</string>
+    <string name="delete_bar_btn">Delete bar</string>
+    <string name="clone_bar_btn">Clone bar</string>
+    <string name="add_bar_btn">Add bar</string>
+    <string name="track_title_hint">Track title</string>
+    <string name="track_move_up_btn">Move up</string>
+    <string name="track_move_down_btn">Move down</string>
+    <string name="track_delete_btn">Delete</string>
+    <string name="track_play_together_chb">Play with prev.track</string>
+
+    <string name="snd_blank">Blank</string>
+    <string name="snd_clave_X">Hit [X]</string>
+    <string name="snd_djembe_G">Bass [G]</string>
+    <string name="snd_djembe_D">Bass [D]</string>
+    <string name="snd_djembe_g">Tone [g]</string>
+    <string name="snd_djembe_d">Tone [d]</string>
+    <string name="snd_djembe_P">Slap [P]</string>
+    <string name="snd_djembe_T">Slap [T]</string>
+
+    <string name="pref_ui">UI Preferences</string>
+    <string name="pref_editor">Editor Preferences</string>
+    <string name="pref_ui_mode">Show instrument picture, not buttons</string>
+    <string name="pref_auto_add_bar">Add new measure bar to a track when cursor reaches the end of the track</string>
+
+</resources>

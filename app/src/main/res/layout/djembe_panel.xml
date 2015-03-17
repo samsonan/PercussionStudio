@@ -1,0 +1,109 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/djembe_sounds_panel"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/button_panel_block"
+    android:padding="10dp">
+
+    <TableLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <TableRow android:layout_height="30dp">
+
+            <TextView
+                android:layout_marginBottom="5dp"
+                android:gravity="center"
+                android:text="Left" />
+
+            <TextView
+                android:layout_marginBottom="5dp"
+                android:gravity="center"
+                android:text="Right" />
+
+        </TableRow>
+
+        <TableRow android:layout_height="20dp">
+
+            <Button
+                android:id="@+id/sound_bass_left"
+                android:width="80dp"
+                style="@style/panel_button"
+                android:onClick="onSoundSelected"
+                android:text="@string/snd_djembe_D" />
+
+            <Button
+                android:id="@+id/sound_bass_right"
+                android:width="80dp"
+                style="@style/panel_button"
+                android:onClick="onSoundSelected"
+                android:text="@string/snd_djembe_G" />
+
+            <Button
+                android:layout_marginLeft="20dp"
+                android:drawableLeft="@drawable/ic_arrow_left_24dp"
+                android:id="@+id/sound_del"
+                android:width="60dp"
+                style="@style/panel_button"
+                android:onClick="onSoundSelected"
+                android:text="Del" />
+
+        </TableRow>
+
+        <TableRow android:layout_height="30dp">
+
+            <Button
+                android:id="@+id/sound_tone_left"
+                style="@style/panel_button"
+                android:onClick="onSoundSelected"
+                android:text="@string/snd_djembe_d" />
+
+            <Button
+                android:id="@+id/sound_tone_right"
+                style="@style/panel_button"
+                android:onClick="onSoundSelected"
+                android:text="@string/snd_djembe_g" />
+
+        </TableRow>
+
+        <TableRow android:layout_height="30dp">
+
+            <Button
+                android:id="@+id/sound_slap_left"
+                style="@style/panel_button"
+                android:onClick="onSoundSelected"
+                android:text="@string/snd_djembe_T" />
+
+            <Button
+                android:id="@+id/sound_slap_right"
+                style="@style/panel_button"
+                android:onClick="onSoundSelected"
+                android:text="@string/snd_djembe_P" />
+        </TableRow>
+
+        <TableRow>
+
+            <Button
+                android:id="@+id/sound_blank"
+                android:layout_span="2"
+                style="@style/panel_button"
+                android:onClick="onSoundSelected"
+                android:text="@string/snd_blank" />
+        </TableRow>
+
+    </TableLayout>
+
+    <ImageView
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:onClick="onInstrumentSelect"
+        android:layout_margin="5dp"
+        android:id="@+id/instrument_select_btn"
+        android:src="@drawable/hover_instrument_btn"
+        android:layout_gravity="bottom|right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        />
+
+</FrameLayout>

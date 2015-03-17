@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.samsonan.android.percussionstudio" >
+
+    <uses-sdk
+        android:minSdkVersion="14"
+        android:targetSdkVersion="21" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name=".components.RhythmListActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".components.RhythmViewActivity"
+            android:label="@string/title_rhythm_view"
+            android:parentActivityName=".components.RhythmListActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".components.RhythmListActivity" />
+        </activity>
+        <activity
+            android:name=".components.RhythmEditActivity"
+            android:label="@string/title_rhythm_edit"
+            android:parentActivityName=".components.RhythmListActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".components.RhythmListActivity" />
+        </activity>
+        <activity android:name=".components.SettingsActivity" />
+    </application>
+
+</manifest>
