@@ -170,11 +170,11 @@ public class TrackView extends View {
     private void calculateBitsPosition() {
         mPositionMap = new HashMap<>();
 
-        for (int i = 0; i < mRhythmInfo.getTracks().size(); i++) {
-            SoundInfo[] sounds = mRhythmInfo.getTracks().get(i).getSounds();
+        for (int i = 0; i < mRhythmInfo.getTrackCnt(); i++) {
+            SoundInfo[] sounds = mRhythmInfo.getTrackIdx(i).getSounds();
             float[] positionArrayX = new float[sounds.length + 1]; //+1 for the right side of the last bit
 
-            for (int j = 0; j < mRhythmInfo.getTracks().get(i).getBarCnt(); j++) {
+            for (int j = 0; j < mRhythmInfo.getTrackIdx(i).getBarCnt(); j++) {
                 for (int k = 0; k < (mRhythmInfo.getSoundNumberForBar()); k++)
                     positionArrayX[j * mRhythmInfo.getSoundNumberForBar() + k] = mDensity * ( PADDING + BUTTON_SPACE + (j * mRhythmInfo.getSoundNumberForBar() + k) * BIT_SQUARE_WIDTH );
             }
@@ -294,7 +294,7 @@ public class TrackView extends View {
          * Used to determine allowable dragging/panning distance in relate to the view bounds
          */
         float mRightmostDrawingEnd = mDensity * (PADDING + BUTTON_SPACE + BIT_SQUARE_WIDTH * mRhythmInfo.getSoundNumberForBar() * mRhythmInfo.getMaxBarCnt() + BUTTON_SPACE);
-        mBottomDrawingEnd = mDensity * ((mRhythmInfo.getTracks().size()) * (2 * PADDING + TRACK_HEIGHT + TRACK_TITLE_HEIGHT) + TRACK_HEIGHT * 2f / 3);
+        mBottomDrawingEnd = mDensity * ((mRhythmInfo.getTrackCnt()) * (2 * PADDING + TRACK_HEIGHT + TRACK_TITLE_HEIGHT) + TRACK_HEIGHT * 2f / 3);
 
         if (mRightmostDrawingEnd < mViewWidth) { // if the view fits the screen - don't allow to move at all (X axis)
             translateX = 0;
@@ -323,9 +323,9 @@ public class TrackView extends View {
          */
         int lastConnectedPlayedTrack = -1;
 
-        for (int i = 0; i < mRhythmInfo.getTracks().size(); i++) {
+        for (int i = 0; i < mRhythmInfo.getTrackCnt(); i++) {
 
-            TrackInfo trackInfo = mRhythmInfo.getTracks().get(i);
+            TrackInfo trackInfo = mRhythmInfo.getTrackIdx(i);
             float [] positionArrayX = mPositionMap.get(i);
 
             float trackTopEnd = mDensity * ( PADDING + TRACK_TITLE_HEIGHT + i * (TRACK_TITLE_HEIGHT + TRACK_HEIGHT + PADDING * 2) );
@@ -337,7 +337,7 @@ public class TrackView extends View {
                     (mSelectedTrack == i && mSelectedBar == -1 && mSelectedPosition == -1) ? mSelectedBarPaint : mTrackTitleBg);
 
             // track title and info
-            canvas.drawText(trackInfo.getTitle() + " [" + trackInfo.getInstrument().name() + "] " + (trackInfo.isConnectedPrev() ? playTogetherStr : ""),
+            canvas.drawText("x"+trackInfo.getPlayTimes() +" "+ (trackInfo.isConnectedPrev() ? playTogetherStr : " ")+ " [" + trackInfo.getInstrument().name() + "] "+trackInfo.getTitle(),
                     PADDING * 2 * mDensity, trackTopEnd - mDensity * TRACK_HEADER_PADDING, mTrackInfoTextPaint);
 
             //rightmost measure bar of the track
@@ -477,7 +477,7 @@ public class TrackView extends View {
              *
              * We clicked somhere in the track are
              */
-            if (y > 0 && y < mDensity * (2 * PADDING + TRACK_HEIGHT + TRACK_TITLE_HEIGHT) * mRhythmInfo.getTracks().size()) {
+            if (y > 0 && y < mDensity * (2 * PADDING + TRACK_HEIGHT + TRACK_TITLE_HEIGHT) * mRhythmInfo.getTrackCnt()) {
 
                 int trackIdx = -1;
 
@@ -485,7 +485,7 @@ public class TrackView extends View {
                 float fullTrackHeight = mDensity * (2 * PADDING + TRACK_HEIGHT + TRACK_TITLE_HEIGHT);
 
                 //find out which track was clicked
-                for (int j = 1; j < mRhythmInfo.getTracks().size() + 1; j++) {
+                for (int j = 1; j < mRhythmInfo.getTrackCnt() + 1; j++) {
                     if (y < j * fullTrackHeight) {
                         previousTracksBottom = (j - 1) * fullTrackHeight;
                         trackIdx = j - 1;
@@ -615,7 +615,7 @@ public class TrackView extends View {
         /**
          * If selected position if further tha actual number of sounds, add new measure bar!
          */
-        if (position >= mRhythmInfo.getSoundNumberForBar() * mRhythmInfo.getTracks().get(trackIdx).getBarCnt()) {
+        if (position >= mRhythmInfo.getSoundNumberForBar() * mRhythmInfo.getTrackIdx(trackIdx).getBarCnt()) {
             if (mFragmentListenerCallback.isAddBarOnTrackEnd()) {
                 mFragmentListenerCallback.onAddBarToTrack(trackIdx);
                 invalidate();

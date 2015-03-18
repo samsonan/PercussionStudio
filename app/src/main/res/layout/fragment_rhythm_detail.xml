@@ -169,8 +169,34 @@
             android:id="@+id/action_track_delete"
             android:onClick="onTrackAction"
             android:layout_width="wrap_content"
-            android:layout_alignBottom="@+id/action_track_move_down"
-            android:layout_alignLeft="@+id/is_connected_chb" />
+            android:layout_below="@id/action_track_move_down" />
+
+        <LinearLayout
+            android:paddingLeft="10dp"
+            android:layout_below="@id/is_connected_chb"
+            android:layout_toRightOf="@id/action_track_move_up"
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <TextView
+                android:textSize="16sp"
+                android:text="Play"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+            <EditText
+                android:id="@+id/track_times_edit"
+                android:inputType="number"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:textSize="16sp"
+                android:text=" times (1 to 5)"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+        </LinearLayout>
+
     </RelativeLayout>
 
     <FrameLayout

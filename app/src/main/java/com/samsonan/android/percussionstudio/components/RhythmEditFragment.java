@@ -195,7 +195,7 @@ public class RhythmEditFragment extends Fragment
     public void onAddBarToTrack(int trackIdx) {
         mIsChangesMade = true;
         Log.d(TAG, "onAddBarToTrack.  trackIdx:" + trackIdx);
-        mRhythmInfo.getTracks().get(trackIdx).addBars(1, mRhythmInfo.getSoundNumberForBar());
+        mRhythmInfo.getTrackIdx(trackIdx).addBars(1, mRhythmInfo.getSoundNumberForBar());
         mMusicPanel.setRhythmInfo(mRhythmInfo, true);
         mIsChangesMade = true;
 
@@ -223,7 +223,7 @@ public class RhythmEditFragment extends Fragment
 
         Log.d(TAG, "onPositionSelected.  positionIdx:" + positionIdx + ", trackIdx:" + trackIdx);
 
-        mCurrentInstrument = mRhythmInfo.getTracks().get(trackIdx).getInstrument();
+        mCurrentInstrument = mRhythmInfo.getTrackIdx(trackIdx).getInstrument();
 
         showInstrumentPanel();
 
@@ -277,8 +277,15 @@ public class RhythmEditFragment extends Fragment
              * Connect track to the previous track - only if there is a prev. track!
              */
             CheckBox connectedChb = (CheckBox) mRootView.findViewById(R.id.is_connected_chb);
-            connectedChb.setChecked(mRhythmInfo.getTracks().get(trackIdx).isConnectedPrev());
+            connectedChb.setChecked(mRhythmInfo.getTrackIdx(trackIdx).isConnectedPrev());
             connectedChb.setEnabled(trackIdx > 0);
+
+            EditText trackTitle = (EditText) mRootView.findViewById(R.id.track_title_edit);
+            trackTitle.setText(mRhythmInfo.getTrackIdx(trackIdx).getTitle());
+
+            EditText trackPlayTimes = (EditText) mRootView.findViewById(R.id.track_times_edit);
+            trackPlayTimes.setText(mRhythmInfo.getTrackIdx(trackIdx).getPlayTimes()+"");
+
 
         } else {
             mSoundEditorPanel.setVisibility(View.GONE);
@@ -307,7 +314,7 @@ public class RhythmEditFragment extends Fragment
         switch (button.getId()) {
             case R.id.action_track_delete:
 
-                if (mRhythmInfo.getTracks().size() > 1) {
+                if (mRhythmInfo.getTrackCnt() > 1) {
 
                     mRhythmInfo.removeTrack(trackIdx);
                     mMusicPanel.setRhythmInfo(mRhythmInfo, true);
@@ -319,7 +326,7 @@ public class RhythmEditFragment extends Fragment
                 break;
             case R.id.action_track_move_down:
 
-                if (trackIdx < mRhythmInfo.getTracks().size() - 1) {
+                if (trackIdx < mRhythmInfo.getTrackCnt() - 1) {
 
                     mRhythmInfo.swapTracks(trackIdx + 1, trackIdx);
                     mMusicPanel.setRhythmInfo(mRhythmInfo, false);
@@ -347,7 +354,7 @@ public class RhythmEditFragment extends Fragment
                 if (((CheckBox) button).isChecked()) {
                     mRhythmInfo.setConnectedFlag(trackIdx);
                 } else {
-                    mRhythmInfo.getTracks().get(trackIdx).setConnectedPrev(false);
+                    mRhythmInfo.getTrackIdx(trackIdx).setConnectedPrev(false);
                 }
 
                 mMusicPanel.setRhythmInfo(mRhythmInfo, false);
@@ -371,18 +378,18 @@ public class RhythmEditFragment extends Fragment
 
         switch (button.getId()) {
             case R.id.add_bar:
-                mRhythmInfo.getTracks().get(trackIdx).addBars((barIdx+1), 1, mRhythmInfo.getSoundNumberForBar());
+                mRhythmInfo.getTrackIdx(trackIdx).addBars((barIdx+1), 1, mRhythmInfo.getSoundNumberForBar());
                 break;
             case R.id.clone_bar:
-                mRhythmInfo.getTracks().get(trackIdx).cloneBar(barIdx, mRhythmInfo.getSoundNumberForBar());
+                mRhythmInfo.getTrackIdx(trackIdx).cloneBar(barIdx, mRhythmInfo.getSoundNumberForBar());
                 break;
             case R.id.delete_bar:
 
                 //only one bar - it cannot be deleted!
-                if (mRhythmInfo.getTracks().get(trackIdx).getBarCnt() <= 1)
+                if (mRhythmInfo.getTrackIdx(trackIdx).getBarCnt() <= 1)
                     return;
 
-                mRhythmInfo.getTracks().get(trackIdx).removeBar(barIdx, mRhythmInfo.getSoundNumberForBar());
+                mRhythmInfo.getTrackIdx(trackIdx).removeBar(barIdx, mRhythmInfo.getSoundNumberForBar());
                 mMusicPanel.setSelectedPosition(0, trackIdx);
                 onPositionSelected(0, trackIdx);
                 break;
@@ -406,7 +413,7 @@ public class RhythmEditFragment extends Fragment
                 return;
 
             int trackIdx = mMusicPanel.getSelectedTrack();
-            TrackInfo track = mRhythmInfo.getTracks().get(trackIdx);
+            TrackInfo track = mRhythmInfo.getTrackIdx(trackIdx);
             track.getSounds()[positionX - 1] = null;
 
             mMusicPanel.setSelectedPosition(positionX - 1, trackIdx);
@@ -421,11 +428,11 @@ public class RhythmEditFragment extends Fragment
     }
 
     public void onSoundSelected(InstrumentSound newSound) {
-        TrackInfo track = mRhythmInfo.getTracks().get(mMusicPanel.getSelectedTrack());
+        TrackInfo track = mRhythmInfo.getTrackIdx(mMusicPanel.getSelectedTrack());
         if (newSound == null)
             track.getSounds()[mMusicPanel.getSelectedPosition()] = null;
         else {
-            track.getSounds()[mMusicPanel.getSelectedPosition()] = new SoundInfo(newSound);
+            track.getSounds()[mMusicPanel.getSelectedPosition()] = new SoundInfo(newSound, 0);
         }
 
         mMusicPanel.setRhythmInfo(mRhythmInfo, false);
@@ -653,7 +660,22 @@ public class RhythmEditFragment extends Fragment
         trackTitleEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                mRhythmInfo.getTracks().get(mMusicPanel.getSelectedTrack()).setTitle(((EditText) v).getText().toString());
+                mRhythmInfo.getTrackIdx(mMusicPanel.getSelectedTrack()).setTitle(((EditText) v).getText().toString());
+                mMusicPanel.setRhythmInfo(mRhythmInfo, false);
+            }
+        });
+
+        EditText trackTimesEditText = (EditText) mRootView.findViewById(R.id.track_times_edit);
+        trackTimesEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                int number = Integer.parseInt(((EditText) v).getText().toString());
+                if (number <= 0)
+                    number = 1;
+                if (number > 5)
+                    number = 5;
+                ((EditText) v).setText(number + "");
+                mRhythmInfo.setTrackPlayTimesCnt(mMusicPanel.getSelectedTrack(), number);
                 mMusicPanel.setRhythmInfo(mRhythmInfo, false);
             }
         });
@@ -993,9 +1015,9 @@ public class RhythmEditFragment extends Fragment
                 if (mCurrentInstrument != selected) { //user selected new instrument
                     mCurrentInstrument = selected;
                     //remove all sound information from current track
-                    mRhythmInfo.getTracks().get(mMusicPanel.getSelectedTrack()).discardSoundInformation();
+                    mRhythmInfo.getTrackIdx(mMusicPanel.getSelectedTrack()).discardSoundInformation();
                     //set new instrument for the track
-                    mRhythmInfo.getTracks().get(mMusicPanel.getSelectedTrack()).setInstrument(selected);
+                    mRhythmInfo.getTrackIdx(mMusicPanel.getSelectedTrack()).setInstrument(selected);
 
                     mMusicPanel.setRhythmInfo(mRhythmInfo, false);
                     Log.d(TAG, "all sound information for track " + mMusicPanel.getSelectedTrack() + " is discarded");
@@ -1089,6 +1111,8 @@ public class RhythmEditFragment extends Fragment
         }
     }
 
+    int mPlayTimes = 1;
+
     private class PlayerTimerTask extends TimerTask {
 
         @Override
@@ -1101,21 +1125,22 @@ public class RhythmEditFragment extends Fragment
                     if (mPlayTrack == -1) {
                         Log.d(TAG, "Start playing. play mode - all.mCounter:" + mCounter);
                         mPlayTrack = 0;
+                        mPlayTimes =  mRhythmInfo.getTrackIdx(0).getPlayTimes();
                     }
 
-                    for (int i = mPlayTrack; i < mRhythmInfo.getTracks().size(); i++) {
+                    for (int i = mPlayTrack; i < mRhythmInfo.getTrackCnt(); i++) {
 
                         //we are playing whole rhythm but not the current and not the connected track, move to next track
-                        if (!mIsOneTrackPlaying && mPlayTrack != i && !mRhythmInfo.getTracks().get(i).isConnectedPrev())
+                        if (!mIsOneTrackPlaying && mPlayTrack != i && !mRhythmInfo.getTrackIdx(i).isConnectedPrev())
                             break;
 
-                        SoundInfo sound = mRhythmInfo.getTracks().get(i).getSounds()[mCounter];
+                        SoundInfo sound = mRhythmInfo.getTrackIdx(i).getSounds()[mCounter];
 
                         if (sound != null) {
                             if (mIsOneTrackPlaying && mPlayTrack == i) {//playing one specific track
                                 mFactory.playSound(sound.getSound());
                                 break;//only one track is played, no need to go through every track
-                            } else if (!mIsOneTrackPlaying && (mPlayTrack == i || mPlayTrack != i && mRhythmInfo.getTracks().get(i).isConnectedPrev()))
+                            } else if (!mIsOneTrackPlaying && (mPlayTrack == i || mPlayTrack != i && mRhythmInfo.getTrackIdx(i).isConnectedPrev()))
                                 mFactory.playSound(sound.getSound());
                         }
                     }
@@ -1125,20 +1150,27 @@ public class RhythmEditFragment extends Fragment
 
                     mCounter++;
 
-                    mCounter = mCounter % (mRhythmInfo.getSoundNumberForBar() * mRhythmInfo.getTracks().get(mPlayTrack).getBarCnt());
+                    mCounter = mCounter % (mRhythmInfo.getSoundNumberForBar() * mRhythmInfo.getTrackIdx(mPlayTrack).getBarCnt());
 
                     if (!mIsOneTrackPlaying && mCounter == 0) {
                         //we should check track play mode of the NEXT track and if the mode of the NEXT track is sequential, we should change track
-                        Log.d(TAG, "we reached the end of the track, current counter value is 0. switching track");
+                        Log.d(TAG, "we reached the end of the track, current counter value is 0. track play times left:"+(mPlayTimes-1));
+
+                        if (mPlayTimes > 1){
+                            mPlayTimes--;
+                            return;
+                        }
+
                         int newPlayTrack = 0; //if we will not find the next seq track, then move to the first one
-                        for (int i = mPlayTrack + 1; i < mRhythmInfo.getTracks().size(); i++) {
-                            if (!mRhythmInfo.getTracks().get(i).isConnectedPrev()) {
+                        for (int i = mPlayTrack + 1; i < mRhythmInfo.getTrackCnt(); i++) {
+                            if (!mRhythmInfo.getTrackIdx(i).isConnectedPrev()) {
                                 Log.d(TAG, "current playing track is " + mPlayTrack + ". found track idx " + i + " with seq playing mode. new playing track will have idx " + i);
                                 newPlayTrack = i;
                                 break;
                             }
                         }
                         mPlayTrack = newPlayTrack;
+                        mPlayTimes = mRhythmInfo.getTrackIdx(newPlayTrack).getPlayTimes();
                     }
                 }
             });

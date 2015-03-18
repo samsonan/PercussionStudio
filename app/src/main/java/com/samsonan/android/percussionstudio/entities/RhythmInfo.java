@@ -48,9 +48,9 @@ public class RhythmInfo {
 
     public int getMaxBarCnt(){
         int max = 0;
-        for (int i = 0; i < getTracks().size(); i++) {
-            if (getTracks().get(i).getBarCnt()>max)
-                max = getTracks().get(i).getBarCnt();
+        for (int i = 0; i < mTracks.size(); i++) {
+            if (mTracks.get(i).getBarCnt()>max)
+                max = mTracks.get(i).getBarCnt();
         }
         return max;
     }
@@ -96,6 +96,7 @@ public class RhythmInfo {
         }
 
         //now we need to extend all connected tracks to that length
+        //going Up
         for (int i=trackIdx;i>=0;i--){
             if (mTracks.get(i).getBarCnt() < maxBarCnt)
                 mTracks.get(i).addBars(maxBarCnt - mTracks.get(i).getBarCnt(), getSoundNumberForBar());
@@ -103,14 +104,49 @@ public class RhythmInfo {
                 break;
         }
 
+        //going Down
+        for (int i=trackIdx+1;i<mTracks.size();i++){
+            if (!mTracks.get(i).isConnectedPrev())
+                break;
+            if (mTracks.get(i).getBarCnt() < maxBarCnt)
+                mTracks.get(i).addBars(maxBarCnt - mTracks.get(i).getBarCnt(), getSoundNumberForBar());
+        }
+
         mTracks.get(trackIdx).setConnectedPrev(true);
+
+        //now we have to sync play times between all tracks!
+        setTrackPlayTimesCnt(trackIdx, mTracks.get(trackIdx).getPlayTimes());
     }
+
+    /**
+     * Play times should be equal for all connected tracks
+     */
+    public void setTrackPlayTimesCnt(int trackIdx, int playTimesCnt){
+
+        //now we need to extend all connected tracks to that length
+        //going Up
+        for (int i=trackIdx;i>=0;i--){
+            if (!mTracks.get(i).isConnectedPrev())
+                break;
+            mTracks.get(i-1).setPlayTimes(playTimesCnt);
+        }
+
+        //going Down
+        for (int i=trackIdx+1;i<mTracks.size();i++){
+            if (!mTracks.get(i).isConnectedPrev())
+                break;
+            mTracks.get(i).setPlayTimes(playTimesCnt);
+        }
+
+        mTracks.get(trackIdx).setPlayTimes(playTimesCnt);
+    }
+
+
 
     /**
      * Remove connected flag from current track and all other connected (to it) tracks.
      * Used when we change order of tracks
      *
-     * @param trackIdx
      */
     public void removeConnectedFlagCascade(int trackIdx){
         for (int i = trackIdx; i < mTracks.size(); i++) {
@@ -136,8 +172,12 @@ public class RhythmInfo {
         this.mTitle = mTitle;
     }
 
-    public List<TrackInfo> getTracks() {
-        return mTracks;
+    public TrackInfo getTrackIdx(int trackIdx){
+        return mTracks.get(trackIdx);
+    }
+
+    public int getTrackCnt() {
+        return mTracks.size();
     }
 
     public void addTrack(TrackInfo newTrack) {

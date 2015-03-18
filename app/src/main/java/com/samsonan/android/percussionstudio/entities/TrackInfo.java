@@ -18,16 +18,18 @@ public class TrackInfo {
     private String mTitle = "";
     private SoundInfo[] mSounds;
     private InstrumentFactory.Instruments mInstrument; // 0 - djembe
+    private int mPlayTimes = 1;
     private boolean mIsConnectedPrev;
     private int mBarCnt = 2;          // number of bars (blocks, measures) in the rhythm
 
 
-    public TrackInfo(long id, String title, InstrumentFactory.Instruments instrument, int barCnt, int connected) {
+    public TrackInfo(long id, String title, InstrumentFactory.Instruments instrument, int barCnt, int connected, int playTimes) {
         this.mTitle = title;
         this.mInstrument = instrument;
         this.mId = id;
         this.mBarCnt = barCnt;
-        mIsConnectedPrev = connected > 0;
+        this.mIsConnectedPrev = connected > 0;
+        this.mPlayTimes = playTimes;
     }
 
     public void appendSoundArray(SoundInfo[] sounds){
@@ -162,6 +164,15 @@ public class TrackInfo {
         mIsConnectedPrev = isConnected;
     }
 
+    public int getPlayTimes() {
+        return mPlayTimes;
+    }
+
+    //package access!
+    void setPlayTimes(int playTimes) {
+        this.mPlayTimes = playTimes;
+    }
+
     @Override
     public String toString() {
         return "TrackInfo{" +
@@ -169,6 +180,7 @@ public class TrackInfo {
                 ", mTitle='" + mTitle + '\'' +
                 ", mSounds=[" + Arrays.toString(mSounds) +"]"+
                 ", mBarCnt=" + mBarCnt +
+                ", mPlayTimes=" + mPlayTimes +
                 ", mInstrument=" + mInstrument +
                 '}';
     }

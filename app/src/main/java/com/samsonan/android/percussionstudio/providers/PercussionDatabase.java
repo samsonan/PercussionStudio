@@ -51,6 +51,7 @@ public class PercussionDatabase {
         public static final String COLUMN_NAME_BAR_CNT = "bar_cnt" ;
         public static final String COLUMN_NAME_CONNECTED = "connect_flag" ;
         public static final String COLUMN_NAME_INSTRUMENT = "instrument";
+        public static final String COLUMN_NAME_PLAY_TIMES = "play_times";
 	}
 	
 	
@@ -62,13 +63,14 @@ public class PercussionDatabase {
 
         public static final String COLUMN_NAME_TRACK_ID = "track_id";
         public static final String COLUMN_NAME_SOUND_TYPE = "sound" ;
+        public static final String COLUMN_NAME_SOUND_MOD = "sound_mod" ;
         public static final String COLUMN_NAME_ORDINAL = "ordinal" ;
     }
 	
     static class MetaphorsDBHelper extends SQLiteOpenHelper {
 
         private static final String DATABASE_NAME = "percussion.db";
-        private static final int SCHEMA_VERSION = 1;
+        private static final int SCHEMA_VERSION = 3;
 
         MetaphorsDBHelper(Context context) {
             super(context, DATABASE_NAME, null, SCHEMA_VERSION);
@@ -98,8 +100,9 @@ public class PercussionDatabase {
 
             db.execSQL("CREATE TABLE " + TrackTable.TABLE_NAME + " ( " + 
             		TrackTable._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," + 
-            		TrackTable.COLUMN_NAME_TITLE + " TEXT, " + 
-            		TrackTable.COLUMN_NAME_RHYTHM_ID + " INTEGER, " +
+            		TrackTable.COLUMN_NAME_TITLE + " TEXT, " +
+                    TrackTable.COLUMN_NAME_RHYTHM_ID + " INTEGER, " +
+            		TrackTable.COLUMN_NAME_PLAY_TIMES + " INTEGER DEFAULT 1, " +
                     TrackTable.COLUMN_NAME_CONNECTED + " INTEGER DEFAULT 0, " +
                     TrackTable.COLUMN_NAME_BAR_CNT + " INTEGER DEFAULT 2, " +
                     TrackTable.COLUMN_NAME_INSTRUMENT + " INTEGER DEFAULT 0);");
@@ -109,7 +112,8 @@ public class PercussionDatabase {
                     SoundTable._ID + " INTEGER PRIMARY KEY AUTOINCREMENT ," + 
                     SoundTable.COLUMN_NAME_TRACK_ID + " INTEGER, " +
                     SoundTable.COLUMN_NAME_ORDINAL + " INTEGER, " +
-                    SoundTable.COLUMN_NAME_SOUND_TYPE + " INTEGER DEFAULT 0);");
+                    SoundTable.COLUMN_NAME_SOUND_TYPE + " INTEGER DEFAULT 0, " +
+                    SoundTable.COLUMN_NAME_SOUND_MOD + " INTEGER DEFAULT 0);");
 
 
             Log.d(TAG, "database is created");
@@ -192,6 +196,7 @@ public class PercussionDatabase {
                     ", "+TrackTable.COLUMN_NAME_BAR_CNT+
                     ", "+TrackTable.COLUMN_NAME_CONNECTED+
         			", "+TrackTable._ID+
+                    ", "+TrackTable.COLUMN_NAME_PLAY_TIMES+
         			" FROM "+TrackTable.TABLE_NAME+" t " +
         			" WHERE t."+TrackTable.COLUMN_NAME_RHYTHM_ID+" = ? ", 
         			new String[]{rhythmCursor.getLong(4)+""});
@@ -201,11 +206,12 @@ public class PercussionDatabase {
         		
         		Instruments instrument = Instruments.values()[trackCursor.getInt(1)];
         		
-        		TrackInfo trackInfo = new TrackInfo(trackCursor.getLong(4), trackCursor.getString(0), instrument, trackCursor.getInt(2), trackCursor.getInt(3));
+        		TrackInfo trackInfo = new TrackInfo(trackCursor.getLong(4), trackCursor.getString(0), instrument, trackCursor.getInt(2), trackCursor.getInt(3), trackCursor.getInt(5));
 
         		Cursor soundsCursor = db.rawQuery("SELECT "+SoundTable.COLUMN_NAME_SOUND_TYPE+
             			", "+SoundTable._ID+
                         ", "+SoundTable.COLUMN_NAME_ORDINAL+
+                        ", "+SoundTable.COLUMN_NAME_SOUND_MOD+
             			" FROM "+SoundTable.TABLE_NAME+" s " +
             			" WHERE s."+SoundTable.COLUMN_NAME_TRACK_ID+" = ? ORDER BY "+SoundTable.COLUMN_NAME_ORDINAL+" ASC", 
             			new String[]{trackCursor.getLong(4)+""});
@@ -214,7 +220,7 @@ public class PercussionDatabase {
             	while (soundsCursor.moveToNext()) {
             		Log.d(TAG, "Sound found. int type: "+soundsCursor.getInt(0)+". enum type: "+ InstrumentFactory.getSoundById(soundsCursor.getInt(0), instrument));
                     if (soundsCursor.getInt(0) == -1) continue;
-            		sounds[soundsCursor.getInt(2)] = new SoundInfo(InstrumentFactory.getSoundById(soundsCursor.getInt(0),instrument));
+            		sounds[soundsCursor.getInt(2)] = new SoundInfo(InstrumentFactory.getSoundById(soundsCursor.getInt(0),instrument), soundsCursor.getInt(3));
             	}
         		
             	trackInfo.appendSoundArray( sounds );
@@ -298,16 +304,17 @@ public class PercussionDatabase {
 	        Log.d(TAG," Rhythm with ID " + rhythmId +" is saved");
         }
         
-    	for (int i=0; i<rhythmInfo.getTracks().size();i++){
+    	for (int i=0; i<rhythmInfo.getTrackCnt();i++){
 
-    		SoundInfo [] sounds = rhythmInfo.getTracks().get(i).getSounds();
+    		SoundInfo [] sounds = rhythmInfo.getTrackIdx(i).getSounds();
     		
     		cv = new ContentValues();
-            cv.put(TrackTable.COLUMN_NAME_TITLE, rhythmInfo.getTracks().get(i).getTitle());
+            cv.put(TrackTable.COLUMN_NAME_TITLE, rhythmInfo.getTrackIdx(i).getTitle());
             cv.put(TrackTable.COLUMN_NAME_RHYTHM_ID, rhythmId);
-            cv.put(TrackTable.COLUMN_NAME_CONNECTED, rhythmInfo.getTracks().get(i).isConnectedPrev()?1:0);
-            cv.put(TrackTable.COLUMN_NAME_INSTRUMENT, rhythmInfo.getTracks().get(i).getInstrument().ordinal());
-            cv.put(TrackTable.COLUMN_NAME_BAR_CNT, rhythmInfo.getTracks().get(i).getBarCnt());
+            cv.put(TrackTable.COLUMN_NAME_CONNECTED, rhythmInfo.getTrackIdx(i).isConnectedPrev()?1:0);
+            cv.put(TrackTable.COLUMN_NAME_INSTRUMENT, rhythmInfo.getTrackIdx(i).getInstrument().ordinal());
+            cv.put(TrackTable.COLUMN_NAME_BAR_CNT, rhythmInfo.getTrackIdx(i).getBarCnt());
+            cv.put(TrackTable.COLUMN_NAME_PLAY_TIMES, rhythmInfo.getTrackIdx(i).getPlayTimes());
 
             long trackId = db.insert(TrackTable.TABLE_NAME, null, cv);
 
@@ -320,8 +327,11 @@ public class PercussionDatabase {
         		if (sounds[j] == null) {
                     Log.d(TAG," Sound with idx " + j +" is NULL.");
                     cv.put(SoundTable.COLUMN_NAME_SOUND_TYPE, -1);
-        		} else
-        			cv.put(SoundTable.COLUMN_NAME_SOUND_TYPE, sounds[j].getSound().getIndex());
+        		} else {
+                    cv.put(SoundTable.COLUMN_NAME_SOUND_TYPE, sounds[j].getSound().getIndex());
+                    cv.put(SoundTable.COLUMN_NAME_SOUND_MOD, sounds[j].getSoundModMask());
+
+                }
                 cv.put(SoundTable.COLUMN_NAME_TRACK_ID, trackId);
                 cv.put(SoundTable.COLUMN_NAME_ORDINAL, j);
                 long sndId = db.insert(SoundTable.TABLE_NAME, null, cv);
