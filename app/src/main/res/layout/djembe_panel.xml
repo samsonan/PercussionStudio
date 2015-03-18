@@ -44,7 +44,7 @@
                 android:layout_marginLeft="20dp"
                 android:drawableLeft="@drawable/ic_arrow_left_24dp"
                 android:id="@+id/sound_del"
-                android:width="60dp"
+                android:width="80dp"
                 style="@style/panel_button"
                 android:onClick="onSoundSelected"
                 android:text="Del" />
@@ -64,6 +64,13 @@
                 style="@style/panel_button"
                 android:onClick="onSoundSelected"
                 android:text="@string/snd_djembe_g" />
+
+            <Spinner
+                android:visibility="gone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/flam_snd_spinner"
+                 />
 
         </TableRow>
 

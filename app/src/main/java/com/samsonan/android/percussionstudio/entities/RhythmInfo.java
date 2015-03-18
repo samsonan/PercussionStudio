@@ -149,7 +149,8 @@ public class RhythmInfo {
      *
      */
     public void removeConnectedFlagCascade(int trackIdx){
-        for (int i = trackIdx; i < mTracks.size(); i++) {
+        mTracks.get(trackIdx).setConnectedPrev(false);
+        for (int i = trackIdx+1; i < mTracks.size(); i++) {
             if (mTracks.get(i).isConnectedPrev())
                 mTracks.get(i).setConnectedPrev(false);
             else break;//reached last connected track in this pack, exit

@@ -11,6 +11,7 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -18,6 +19,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -27,6 +29,7 @@ import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.samsonan.android.percussionstudio.entities.Djembe;
 import com.samsonan.android.percussionstudio.entities.InstrumentFactory;
 import com.samsonan.android.percussionstudio.entities.InstrumentSound;
 import com.samsonan.android.percussionstudio.R;
@@ -227,6 +230,19 @@ public class RhythmEditFragment extends Fragment
 
         showInstrumentPanel();
 
+        /*
+        //TODO: 1.instrument specific code  - not good
+        //TODO: 2.optimize
+        if (mCurrentInstrument == InstrumentFactory.Instruments.DJEMBE && !mIsSimpleMode
+                && mRhythmInfo.getTrackIdx(trackIdx).getSounds()[positionIdx] != null) {
+            Spinner flamSpinner = (Spinner) mRootView.findViewById(R.id.flam_snd_spinner);
+            flamSpinner.setVisibility(View.VISIBLE);
+            final ArrayAdapter<String> flamAdapter =
+                    new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item,
+                            new String[]{"","Bass","Tone","Slap"});
+            flamSpinner.setAdapter(flamAdapter);
+        } */
+
         mTrackEditPanel.setVisibility(View.GONE);
         mBarEditPanel.setVisibility(View.GONE);
     }
@@ -395,7 +411,7 @@ public class RhythmEditFragment extends Fragment
                 break;
         }
 
-        mRhythmInfo.removeConnectedFlagCascade(trackIdx + 1);
+        mRhythmInfo.removeConnectedFlagCascade(trackIdx);
 
         mMusicPanel.setRhythmInfo(mRhythmInfo, true);
         mIsChangesMade = true;
@@ -656,33 +672,62 @@ public class RhythmEditFragment extends Fragment
             mActivityContainerCallbacks.setActivityTitle(title);
         }
 
-        EditText trackTitleEditText = (EditText) mRootView.findViewById(R.id.track_title_edit);
+        final EditText trackTitleEditText = (EditText) mRootView.findViewById(R.id.track_title_edit);
         trackTitleEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                mRhythmInfo.getTrackIdx(mMusicPanel.getSelectedTrack()).setTitle(((EditText) v).getText().toString());
-                mMusicPanel.setRhythmInfo(mRhythmInfo, false);
+                trackTitleCommit((EditText) v);
             }
         });
+
+        trackTitleEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (EditorInfo.IME_ACTION_DONE == actionId || EditorInfo.IME_ACTION_NEXT == actionId)
+                    trackTitleCommit((EditText)v);
+                return false;
+            }
+        });
+
 
         EditText trackTimesEditText = (EditText) mRootView.findViewById(R.id.track_times_edit);
         trackTimesEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                int number = Integer.parseInt(((EditText) v).getText().toString());
-                if (number <= 0)
-                    number = 1;
-                if (number > 5)
-                    number = 5;
-                ((EditText) v).setText(number + "");
-                mRhythmInfo.setTrackPlayTimesCnt(mMusicPanel.getSelectedTrack(), number);
-                mMusicPanel.setRhythmInfo(mRhythmInfo, false);
+                trackTimesCommit((EditText) v);
+            }
+        });
+
+        trackTimesEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (EditorInfo.IME_ACTION_DONE == actionId || EditorInfo.IME_ACTION_NEXT == actionId)
+                    trackTimesCommit((EditText)v);
+                return false;
             }
         });
 
         onRestoreInstanceState(savedInstanceState);
 
         return mRootView;
+    }
+
+    private void trackTitleCommit(EditText v){
+        mRhythmInfo.getTrackIdx(mMusicPanel.getSelectedTrack()).setTitle(v.getText().toString());
+        mMusicPanel.setRhythmInfo(mRhythmInfo, false);
+        mIsChangesMade = true;
+    }
+
+    private void trackTimesCommit(EditText v){
+        int number = Integer.parseInt(v.getText().toString());
+        if (number <= 0)
+            number = 1;
+        if (number > 5)
+            number = 5;
+        v.setText(number + "");
+        mRhythmInfo.setTrackPlayTimesCnt(mMusicPanel.getSelectedTrack(), number);
+        mMusicPanel.setRhythmInfo(mRhythmInfo, false);
+        mIsChangesMade = true;
     }
 
 
