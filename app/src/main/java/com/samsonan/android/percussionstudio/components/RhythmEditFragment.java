@@ -901,7 +901,7 @@ public class RhythmEditFragment extends Fragment
         Log.d(TAG, "onClick. mRhythmInfo:" + mRhythmInfo + "; mMusicPanel:" + mMusicPanel + ";trackIdx:" + trackIdx);
 
         if (mIsPlayed) { //if music is being played
-            mPlayerTimer.cancel();  //stop timer
+            stopPlayerTimer();  //stop timer
             mCounter = 0;           //reset cursor position
             mMusicPanel.setCurrentPlayPosition(mCounter + 1, -1);
             mIsPlayed = false;
@@ -1153,6 +1153,19 @@ public class RhythmEditFragment extends Fragment
     }
 
     int mPlayTimes = 1;
+
+    private void stopPlayerTimer() {
+        if (null != mPlayerTimer) {
+            mPlayerTimer.cancel();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.d(TAG, "onDestroy() is called");
+        stopPlayerTimer();
+        super.onDestroy();
+    }
 
     private class PlayerTimerTask extends TimerTask {
 
