@@ -25,7 +25,7 @@ public class RhythmInfo {
     /**
      * Initialize new rhythm. Use default values
      */
-    public RhythmInfo(InstrumentFactory.Instruments currentInstrument) {
+    public RhythmInfo(InstrumentFactory.Instrument currentInstrument) {
 
         TrackInfo trackInfo = new TrackInfo(currentInstrument, getSoundNumberForBar());
         mTracks.add(trackInfo);
@@ -173,7 +173,7 @@ public class RhythmInfo {
         this.mTitle = mTitle;
     }
 
-    public TrackInfo getTrackIdx(int trackIdx){
+    public TrackInfo getTrackAtIdx(int trackIdx){
         return mTracks.get(trackIdx);
     }
 

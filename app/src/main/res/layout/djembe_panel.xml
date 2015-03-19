@@ -1,4 +1,4 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.samsonan.android.percussionstudio.views.DjembePanelLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/djembe_sounds_panel"
     android:layout_width="fill_parent"
@@ -113,4 +113,4 @@
         android:layout_height="wrap_content"
         />
 
-</FrameLayout>
+</com.samsonan.android.percussionstudio.views.DjembePanelLayout>

@@ -4,7 +4,6 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * Track entity class
@@ -17,13 +16,13 @@ public class TrackInfo {
     private long mId = -1;
     private String mTitle = "";
     private SoundInfo[] mSounds;
-    private InstrumentFactory.Instruments mInstrument; // 0 - djembe
+    private InstrumentFactory.Instrument mInstrument; // 0 - djembe
     private int mPlayTimes = 1;
     private boolean mIsConnectedPrev;
     private int mBarCnt = 2;          // number of bars (blocks, measures) in the rhythm
 
 
-    public TrackInfo(long id, String title, InstrumentFactory.Instruments instrument, int barCnt, int connected, int playTimes) {
+    public TrackInfo(long id, String title, InstrumentFactory.Instrument instrument, int barCnt, int connected, int playTimes) {
         this.mTitle = title;
         this.mInstrument = instrument;
         this.mId = id;
@@ -36,7 +35,7 @@ public class TrackInfo {
         mSounds = sounds;
     }
 
-    public TrackInfo (InstrumentFactory.Instruments instrument, int soundsInBar){
+    public TrackInfo (InstrumentFactory.Instrument instrument, int soundsInBar){
         this.mInstrument = instrument;
         mSounds = new SoundInfo [soundsInBar * mBarCnt];
     }
@@ -132,15 +131,25 @@ public class TrackInfo {
         Log.d(TAG, "Deleting complete. Result:"+Arrays.toString(mSounds));
     }
 
-    public SoundInfo[] getSounds() {
-        return mSounds;
+    public SoundInfo getSoundAtIdx(int idx) {
+        return mSounds[idx];
     }
 
-    public InstrumentFactory.Instruments getInstrument(){
+    public void setSoundAtIdx(int idx, SoundInfo soundInfo) {
+        mSounds[idx] = soundInfo;
+    }
+
+
+    public int getSoundCnt() {
+        return mSounds.length;
+    }
+
+
+    public InstrumentFactory.Instrument getInstrument(){
         return mInstrument;
     }
 
-    public void setInstrument(InstrumentFactory.Instruments instrument) {
+    public void setInstrument(InstrumentFactory.Instrument instrument) {
         this.mInstrument = instrument;
     }
 

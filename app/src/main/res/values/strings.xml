@@ -46,6 +46,14 @@
     <string name="snd_djembe_P">Slap [P]</string>
     <string name="snd_djembe_T">Slap [T]</string>
 
+    <string name="list_no_flam">No Flam</string>
+    <string name="list_flam_bass">Flam Bass</string>
+    <string name="list_flam_tone">Flam Tone</string>
+    <string name="list_flam_slap">Flam Slap</string>
+
+    <string name="play">Play </string>
+    <string name="times"> times (1 to 10)</string>
+
     <string name="pref_ui">UI Preferences</string>
     <string name="pref_editor">Editor Preferences</string>
     <string name="pref_ui_mode">Show instrument picture, not buttons</string>

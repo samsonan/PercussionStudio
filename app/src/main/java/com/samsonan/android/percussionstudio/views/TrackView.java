@@ -10,7 +10,6 @@ import com.samsonan.android.percussionstudio.entities.TrackInfo;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -34,19 +33,20 @@ public class TrackView extends View {
 
     /** ====================== View Display Constant Values ========================================
     /**  values in pixels, for mdpi. before used, should be translated according to actual density! **/
-    private final static int PADDING = 5; // (each) track padding
-    private final static int TRACK_HEADER_PADDING = 5; // track header text (title and info) padding
-    private final static int BUTTON_SPACE = 38; //space for buttons (i.e. play button) before (each) track
-    private final static int TRACK_HEIGHT = 65; //track height (not including header/title)
-    private final static int TRACK_TITLE_HEIGHT = 24;
-    private final static int TRACK_BAR_HEIGHT = 24; //selectable area of the measure bar
-    private final static int BIT_SQUARE_WIDTH = 25; // width of a bit square
-    private final static int SQUARE_TEXT_PADDING = 7; // text padding inside the bit square
-    private final static int MARKER_THICKNESS = 4; // play/selection marker thickness
-    private final static int MAIN_TEXT = 24; //
-    private final static int SMALL_TEXT = 12; //
+    public final static int PADDING = 5; // (each) track padding
+    public final static int TRACK_HEADER_PADDING = 5; // track header text (title and info) padding
+    public final static int BUTTON_SPACE = 38; //space for buttons (i.e. play button) before (each) track
+    public final static int TRACK_HEIGHT = 65; //track height (not including header/title)
+    public final static int TRACK_TITLE_HEIGHT = 24;
+    public final static int TRACK_BAR_HEIGHT = 24; //selectable area of the measure bar
+    public final static int BIT_SQUARE_WIDTH = 25; // width of a bit square
+    public final static int SQUARE_TEXT_PADDING = 2; // text padding inside the bit square
+    public final static int MARKER_THICKNESS = 4; // play/selection marker thickness
+    public final static int MAIN_TEXT = 20; //
+    public final static int SMALL_TEXT = 12; //
+    public final static int TRACK_HEADER_TEXT = 12; //
 
-    private final static int PANEL_TRANSLATION_CORRECTION = 200; //
+    public final static int PANEL_TRANSLATION_CORRECTION = 200; //
 
     /**
      * ============================  Drawing related vars ==========================================
@@ -57,7 +57,7 @@ public class TrackView extends View {
 
     private Bitmap mPlayButton, mAddTrackButton;
     private Paint mTrackButtonsPaint, mSelectedBitPaint, mPlayedBitPaint, mTrackSupplLinesPaint,
-            mTextPaint, mTrackInfoTextPaint, mTrackBarBg, mTrackTitleBg,
+            mTextPaint,mSmallTextPaint, mTrackInfoTextPaint, mTrackBarBg, mTrackTitleBg,
             mSelectedBarPaint, mAddTrackBg;
 
     private float mBottomDrawingEnd; //lowest pixel drawn in our view - for drag/pan control
@@ -171,10 +171,9 @@ public class TrackView extends View {
         mPositionMap = new HashMap<>();
 
         for (int i = 0; i < mRhythmInfo.getTrackCnt(); i++) {
-            SoundInfo[] sounds = mRhythmInfo.getTrackIdx(i).getSounds();
-            float[] positionArrayX = new float[sounds.length + 1]; //+1 for the right side of the last bit
+            float[] positionArrayX = new float[mRhythmInfo.getTrackAtIdx(i).getSoundCnt() + 1]; //+1 for the right side of the last bit
 
-            for (int j = 0; j < mRhythmInfo.getTrackIdx(i).getBarCnt(); j++) {
+            for (int j = 0; j < mRhythmInfo.getTrackAtIdx(i).getBarCnt(); j++) {
                 for (int k = 0; k < (mRhythmInfo.getSoundNumberForBar()); k++)
                     positionArrayX[j * mRhythmInfo.getSoundNumberForBar() + k] = mDensity * ( PADDING + BUTTON_SPACE + (j * mRhythmInfo.getSoundNumberForBar() + k) * BIT_SQUARE_WIDTH );
             }
@@ -242,9 +241,14 @@ public class TrackView extends View {
         mTextPaint.setTextSize(MAIN_TEXT * mDensity);
         mTextPaint.setColor(Color.BLACK);
 
+        //small text, used to draw complimentary sound info
+        mSmallTextPaint = new Paint();
+        mSmallTextPaint.setTextSize(SMALL_TEXT * mDensity);
+        mSmallTextPaint.setColor(Color.BLACK);
+
         //small text, used to draw track info
         mTrackInfoTextPaint = new Paint();
-        mTrackInfoTextPaint.setTextSize(SMALL_TEXT * mDensity);
+        mTrackInfoTextPaint.setTextSize(TRACK_HEADER_TEXT * mDensity);
         mTrackInfoTextPaint.setColor(Color.BLACK);
 
         //track header
@@ -279,6 +283,9 @@ public class TrackView extends View {
     public void onDraw(Canvas canvas) {
 
         if(isInEditMode()) {
+            /**
+             * To be used in Android Studio. Don't care about resources.
+             */
             Paint paint = new Paint();
             paint.setColor(Color.GRAY);
             canvas.drawRect(0, 0, mViewWidth,mViewHeight, paint);
@@ -325,7 +332,7 @@ public class TrackView extends View {
 
         for (int i = 0; i < mRhythmInfo.getTrackCnt(); i++) {
 
-            TrackInfo trackInfo = mRhythmInfo.getTrackIdx(i);
+            TrackInfo trackInfo = mRhythmInfo.getTrackAtIdx(i);
             float [] positionArrayX = mPositionMap.get(i);
 
             float trackTopEnd = mDensity * ( PADDING + TRACK_TITLE_HEIGHT + i * (TRACK_TITLE_HEIGHT + TRACK_HEIGHT + PADDING * 2) );
@@ -387,8 +394,9 @@ public class TrackView extends View {
                         }
                     }
 
-                    SoundInfo s = trackInfo.getSounds()[k + positionOffset];
-                    canvas.drawText(s == null ? "-" : s.getSound().getDisplayText(), mDensity * SQUARE_TEXT_PADDING + positionArrayX[k + positionOffset], trackBottomEnd - mDensity * SQUARE_TEXT_PADDING, mTextPaint);
+                    SoundInfo s = trackInfo.getSoundAtIdx(k + positionOffset);
+//                    canvas.drawText(s == null ? "-" : s.getDisplayText(), mDensity * SQUARE_TEXT_PADDING + positionArrayX[k + positionOffset], trackBottomEnd - mDensity * SQUARE_TEXT_PADDING, mTextPaint);
+                    drawSoundInfo(canvas, s, mDensity * SQUARE_TEXT_PADDING + positionArrayX[k + positionOffset], trackBottomEnd - mDensity * SQUARE_TEXT_PADDING);
                 }
             }
 
@@ -405,6 +413,13 @@ public class TrackView extends View {
             }
 
         }
+    }
+
+    private void drawSoundInfo(Canvas canvas, SoundInfo s, float leftX, float bottomY) {
+        if (s == null)
+            SoundInfo.drawEmptySound(canvas, leftX, bottomY, mTextPaint, mDensity);
+        else
+            s.drawTrackSound(canvas, leftX, bottomY, mTextPaint, mSmallTextPaint, mDensity);
     }
 
     /**
@@ -615,7 +630,7 @@ public class TrackView extends View {
         /**
          * If selected position if further tha actual number of sounds, add new measure bar!
          */
-        if (position >= mRhythmInfo.getSoundNumberForBar() * mRhythmInfo.getTrackIdx(trackIdx).getBarCnt()) {
+        if (position >= mRhythmInfo.getSoundNumberForBar() * mRhythmInfo.getTrackAtIdx(trackIdx).getBarCnt()) {
             if (mFragmentListenerCallback.isAddBarOnTrackEnd()) {
                 mFragmentListenerCallback.onAddBarToTrack(trackIdx);
                 invalidate();

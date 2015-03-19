@@ -1,7 +1,7 @@
 package com.samsonan.android.percussionstudio.providers;
 
+import com.samsonan.android.percussionstudio.R;
 import com.samsonan.android.percussionstudio.entities.InstrumentFactory;
-import com.samsonan.android.percussionstudio.entities.InstrumentFactory.Instruments;
 import com.samsonan.android.percussionstudio.entities.RhythmInfo;
 import com.samsonan.android.percussionstudio.entities.SoundInfo;
 import com.samsonan.android.percussionstudio.entities.TrackInfo;
@@ -13,6 +13,12 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 import android.util.Log;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 
 /**
  * Helper class and methods to work with app database
@@ -70,10 +76,13 @@ public class PercussionDatabase {
     static class MetaphorsDBHelper extends SQLiteOpenHelper {
 
         private static final String DATABASE_NAME = "percussion.db";
-        private static final int SCHEMA_VERSION = 3;
+        private static final int SCHEMA_VERSION = 1;
+
+        private Context mContext;
 
         MetaphorsDBHelper(Context context) {
             super(context, DATABASE_NAME, null, SCHEMA_VERSION);
+            mContext = context;
         }
 
         @Override
@@ -117,6 +126,18 @@ public class PercussionDatabase {
 
 
             Log.d(TAG, "database is created");
+            populateRhythms(db);
+        }
+
+        private void populateRhythms(SQLiteDatabase db) {
+            Log.d(TAG, "populateRhythms() from file started");
+            String rawSql = readRawTextFile(mContext, R.raw.init_rhythms_v1);
+            String [] splitSql = rawSql.split("\n");
+            for (String sql:splitSql) {
+                Log.d(TAG, "rawSql:"+rawSql);
+                db.execSQL (sql);
+            }
+            Log.d(TAG, "populateRhythms() from file completed");
         }
 
         @Override
@@ -204,7 +225,7 @@ public class PercussionDatabase {
         	while (trackCursor.moveToNext()) {
         		Log.d(TAG, "Track with ID "+trackCursor.getLong(4)+" is found. Processing...");
         		
-        		Instruments instrument = Instruments.values()[trackCursor.getInt(1)];
+        		InstrumentFactory.Instrument instrument = InstrumentFactory.Instrument.values()[trackCursor.getInt(1)];
         		
         		TrackInfo trackInfo = new TrackInfo(trackCursor.getLong(4), trackCursor.getString(0), instrument, trackCursor.getInt(2), trackCursor.getInt(3), trackCursor.getInt(5));
 
@@ -220,14 +241,13 @@ public class PercussionDatabase {
             	while (soundsCursor.moveToNext()) {
             		Log.d(TAG, "Sound found. int type: "+soundsCursor.getInt(0)+". enum type: "+ InstrumentFactory.getSoundById(soundsCursor.getInt(0), instrument));
                     if (soundsCursor.getInt(0) == -1) continue;
-            		sounds[soundsCursor.getInt(2)] = new SoundInfo(InstrumentFactory.getSoundById(soundsCursor.getInt(0),instrument), soundsCursor.getInt(3));
+            		sounds[soundsCursor.getInt(2)] = InstrumentFactory.
+                            getNewSound(InstrumentFactory.getSoundById(soundsCursor.getInt(0), instrument), soundsCursor.getInt(3));
             	}
         		
             	trackInfo.appendSoundArray( sounds );
                 rhythmInfo.addTrack(trackInfo);
-
         	}
-
     	}
 
     	Log.d(TAG, "Rhythm with ID "+rhythmId+" is loaded from DB. Result: "+rhythmInfo);
@@ -247,7 +267,6 @@ public class PercussionDatabase {
         rhythmInfo.setId(-1);
         return saveRhythm(rhythmInfo, false);
     }
-
 
     public void removeRhythmById(long rhythmId){
 
@@ -306,43 +325,65 @@ public class PercussionDatabase {
         
     	for (int i=0; i<rhythmInfo.getTrackCnt();i++){
 
-    		SoundInfo [] sounds = rhythmInfo.getTrackIdx(i).getSounds();
-    		
+            TrackInfo trackInfo = rhythmInfo.getTrackAtIdx(i);
+
     		cv = new ContentValues();
-            cv.put(TrackTable.COLUMN_NAME_TITLE, rhythmInfo.getTrackIdx(i).getTitle());
+            cv.put(TrackTable.COLUMN_NAME_TITLE, trackInfo.getTitle());
             cv.put(TrackTable.COLUMN_NAME_RHYTHM_ID, rhythmId);
-            cv.put(TrackTable.COLUMN_NAME_CONNECTED, rhythmInfo.getTrackIdx(i).isConnectedPrev()?1:0);
-            cv.put(TrackTable.COLUMN_NAME_INSTRUMENT, rhythmInfo.getTrackIdx(i).getInstrument().ordinal());
-            cv.put(TrackTable.COLUMN_NAME_BAR_CNT, rhythmInfo.getTrackIdx(i).getBarCnt());
-            cv.put(TrackTable.COLUMN_NAME_PLAY_TIMES, rhythmInfo.getTrackIdx(i).getPlayTimes());
+            cv.put(TrackTable.COLUMN_NAME_CONNECTED, trackInfo.isConnectedPrev()?1:0);
+            cv.put(TrackTable.COLUMN_NAME_INSTRUMENT, trackInfo.getInstrument().ordinal());
+            cv.put(TrackTable.COLUMN_NAME_BAR_CNT, trackInfo.getBarCnt());
+            cv.put(TrackTable.COLUMN_NAME_PLAY_TIMES, trackInfo.getPlayTimes());
 
             long trackId = db.insert(TrackTable.TABLE_NAME, null, cv);
 
-            Log.d(TAG," Track with ID " + trackId +" is saved for rhythm id = "+rhythmId+". number of sounds: "+sounds.length);
+            Log.d(TAG," Track with ID " + trackId +" is saved for rhythm id = "+rhythmId+". number of sounds: "+trackInfo.getSoundCnt());
 
             cv = new ContentValues();
 
-            for (int j=0; j<sounds.length;j++){
+            for (int j=0; j<rhythmInfo.getTrackAtIdx(i).getSoundCnt();j++){
                 cv.clear();
-        		if (sounds[j] == null) {
+        		if (rhythmInfo.getTrackAtIdx(i).getSoundAtIdx(j) == null) {
                     Log.d(TAG," Sound with idx " + j +" is NULL.");
                     cv.put(SoundTable.COLUMN_NAME_SOUND_TYPE, -1);
         		} else {
-                    cv.put(SoundTable.COLUMN_NAME_SOUND_TYPE, sounds[j].getSound().getIndex());
-                    cv.put(SoundTable.COLUMN_NAME_SOUND_MOD, sounds[j].getSoundModMask());
+                    cv.put(SoundTable.COLUMN_NAME_SOUND_TYPE, trackInfo.getSoundAtIdx(j).getSound().getIndex());
+                    cv.put(SoundTable.COLUMN_NAME_SOUND_MOD, trackInfo.getSoundAtIdx(j).getSoundModMask());
 
                 }
                 cv.put(SoundTable.COLUMN_NAME_TRACK_ID, trackId);
                 cv.put(SoundTable.COLUMN_NAME_ORDINAL, j);
                 long sndId = db.insert(SoundTable.TABLE_NAME, null, cv);
-                Log.d(TAG," Sound with ID " + sndId +" of type "+sounds[j]+" is saved for track: "+trackId);
+                Log.d(TAG," Sound with ID " + sndId +" of type "+trackInfo.getSoundAtIdx(j)+" is saved for track: "+trackId);
         	}
-    		
     	}
     	
         db.close();
         
         return rhythmId;
     }
-	
+
+
+    private static String readRawTextFile(Context ctx, int resId)
+    {
+        InputStream inputStream = ctx.getResources().openRawResource(resId);
+
+        BufferedReader buffReader = new BufferedReader(new InputStreamReader(inputStream, Charset.forName("windows-1251")));
+        String line;
+        StringBuilder text = new StringBuilder();
+
+        try {
+            while (( line = buffReader.readLine()) != null) {
+                if (line.startsWith("--") || line.trim().length()==0)
+                    continue;
+                text.append(line);
+                text.append('\n');
+            }
+        } catch (IOException e) {
+            return null;
+        }
+        return text.toString();
+    }
+
+
 }

@@ -31,9 +31,9 @@ public class RequestInstrumentDialogFragment extends DialogFragment {
 
         final Spinner instrumentSelector = new Spinner(getActivity());
 
-        ArrayAdapter<InstrumentFactory.Instruments> instrumentAdapter =
+        ArrayAdapter<InstrumentFactory.Instrument> instrumentAdapter =
                 new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item,
-                        InstrumentFactory.Instruments.values());
+                        InstrumentFactory.Instrument.values());
 
         instrumentAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
@@ -45,7 +45,7 @@ public class RequestInstrumentDialogFragment extends DialogFragment {
             public void onClick(DialogInterface dialog, int whichButton) {
                 int instrPosition = instrumentSelector.getSelectedItemPosition();
 
-                Log.d(TAG, "Ready to create new rhythm. instrument: " + InstrumentFactory.Instruments.values()[instrPosition]);
+                Log.d(TAG, "Ready to create new rhythm. instrument: " + InstrumentFactory.Instrument.values()[instrPosition]);
                 Intent intent = new Intent(getActivity(), RhythmEditActivity.class);
                 intent.putExtra(RhythmListFragment.INSTRUMENT_ID, instrPosition);
                 startActivity(intent);
